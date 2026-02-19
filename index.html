@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
   <meta name="theme-color" content="#f0f2f5" id="theme-color-meta">
   <title>Alerta Vecinal</title>
   
@@ -36,7 +36,6 @@
       --bg-gradient: linear-gradient(135deg, #09090b 0%, #27272a 100%);
     }
 
-    /* TEMA DUO TONO (Premium Glassmorphism) */
     [data-theme="duotono"] {
       --primary: #38bdf8; --success: #10b981; --danger: #f43f5e; 
       --dark: #ffffff; --gray: #cbd5e1; --bg-color: transparent; 
@@ -52,50 +51,67 @@
       100% { background-position: 0% 50%; }
     }
 
+    html, body {
+      height: 100%; width: 100%;
+      overflow: hidden; margin: 0; padding: 0;
+      touch-action: manipulation;
+    }
+
     body { 
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; 
       background: var(--bg-gradient);
       background-attachment: fixed;
-      margin: 0; padding: 15px; display: flex; justify-content: center; align-items: flex-start; 
-      min-height: 100vh; color: var(--text-main); 
+      display: flex; justify-content: center; align-items: center; 
+      color: var(--text-main); 
       transition: background 0.4s ease, color 0.4s ease;
+      overscroll-behavior: none;
     }
 
-    /* Activación del fondo animado solo para el Duo Tono */
     body.tema-duotono-activo {
       background-size: 400% 400%;
       animation: gradientBG 15s ease infinite;
     }
 
     .container { 
-      width: 100%; max-width: 420px; 
+      width: 92%; max-width: 420px; 
+      max-height: 94vh;
+      overflow-y: auto;
       background: var(--card-bg); 
       padding: 35px 25px; 
       border-radius: 28px; 
       box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
-      text-align: center; margin-top: 10px; 
+      text-align: center; 
       transition: all 0.4s ease; 
       position: relative;
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border);
+      scrollbar-width: none;
     }
+    .container::-webkit-scrollbar { display: none; }
 
     h2 { margin-top: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--dark); }
     p { color: var(--gray); font-size: 15px; line-height: 1.5; }
 
-    /* ESTILO ESPECIAL PARA EL PIN - CORREGIDO CENTRADO */
+    /* ESTILO PIN */
     .pin-input { 
       width: 100%; padding: 20px 0; margin: 25px 0; 
       border: 2px solid var(--border); border-radius: 20px; 
       font-size: 34px; font-weight: 800; text-align: center; 
-      letter-spacing: 18px; 
-      text-indent: 18px; /* Compensa el desfase del letter-spacing */
+      letter-spacing: 18px; text-indent: 18px; 
       font-family: monospace;
       background-color: var(--input-bg); color: var(--text-main); 
       transition: all 0.3s ease; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
     }
     .pin-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); }
+
+    .custom-textarea {
+      width: 100%; padding: 15px; margin: 0 auto 20px auto; 
+      border-radius: 15px; border: 2px solid var(--border); 
+      background: var(--input-bg); color: var(--text-main); 
+      font-size: 16px; font-family: inherit; resize: none;
+      display: block; box-sizing: border-box;
+    }
 
     button { 
       width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 22px; 
@@ -106,17 +122,25 @@
     button:active { transform: scale(0.95) translateY(2px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     
     .btn-primary { background: var(--primary); box-shadow: 0 6px 20px rgba(0, 122, 255, 0.25); }
-    
-    /* Botones Vecino (Súper estéticos) */
     .btn-success { background: linear-gradient(135deg, var(--success), #28a745); height: 110px; font-size: 24px; box-shadow: 0 10px 25px rgba(52, 199, 89, 0.35); }
-    .btn-danger { background: linear-gradient(135deg, var(--danger), #d32f2f); height: 100px; font-size: 22px; box-shadow: 0 10px 25px rgba(255, 59, 48, 0.35); }
-    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--border); padding: 14px; font-size: 15px; box-shadow: none; border-radius: 16px;}
     
+    .btn-danger { background: linear-gradient(135deg, var(--danger), #d32f2f); height: 100px; font-size: 22px; box-shadow: 0 10px 25px rgba(255, 59, 48, 0.35); }
+    
+    /* BOTÓN SOS BLOQUEADO */
+    .sos-bloqueado { 
+      background: #555 !important; 
+      opacity: 0.7; 
+      pointer-events: none; 
+      transform: none !important; 
+      box-shadow: none !important;
+    }
+
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--border); padding: 14px; font-size: 15px; box-shadow: none; border-radius: 16px;}
     .btn-logout { background: transparent; color: var(--gray); box-shadow: none; font-size: 14px; padding: 10px; margin-top: 20px; text-decoration: underline; border-radius: 10px;}
 
-    .vista { display: none; animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .vista { display: none; animation: fadeIn 0.4s ease-out; }
     #vista-login { display: block; } 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
     .historial-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; color: var(--dark);}
     .historial-item:last-child { border-bottom: none; }
@@ -127,41 +151,31 @@
     .tarjeta.sos { background: rgba(255, 59, 48, 0.08); animation: pulseAlert 2s infinite; }
     @keyframes pulseAlert { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
 
-    .acciones-garita { display: flex; gap: 10px; flex-direction: column; margin-top: 20px; }
-    .acciones-garita button { margin: 0; height: 70px; font-size: 20px; border-radius: 18px;}
-    
     #loader { display: none; font-weight: bold; color: var(--primary); margin: 20px 0; font-size: 18px; }
     .sos-container { position: relative; width: 100%; border-radius: 22px; margin-top: 20px; overflow: hidden; }
     #sos-progress { position: absolute; bottom: 0; left: 0; height: 100%; background: rgba(0,0,0,0.3); width: 0%; pointer-events: none; transition: width 0.1s linear;}
 
-    /* PROTECCIÓN DEL DISEÑO DE GARITA (Mantiene su estilo sólido y rápido) */
     #vista-garita.container { backdrop-filter: none; background: var(--card-bg); border: none; }
     .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
     .grid-botones button { padding: 15px 10px; height: 95px; font-size: 14px; margin: 0; background: var(--input-bg); color: var(--dark); border: 2px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 18px;}
     .grid-botones button span { font-size: 26px; display: block; margin-bottom: 5px; }
-    .grid-botones button:active { background: var(--border); border-color: var(--primary); }
 
-    /* Selector de Temas */
     .theme-selector { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
-    .theme-selector button { padding: 12px; font-size: 13px; height: auto; margin: 0; border-radius: 14px; background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border); box-shadow: none; font-weight: 600;}
-    .theme-selector button:active { background: var(--border); }
+    .theme-selector button { padding: 12px; font-size: 12px; height: auto; margin: 0; border-radius: 14px; background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border); box-shadow: none; font-weight: 600;}
     .theme-selector button.active { border-color: var(--primary); background: rgba(0, 122, 255, 0.1); color: var(--primary); }
 
-    /* Modales de UI/UX */
     .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: fadeInModal 0.3s ease; }
     .modal-content { background: var(--card-bg); padding: 35px 30px; border-radius: 28px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid var(--border); }
     .modal-content h3 { margin-top: 0; color: var(--dark); font-size: 24px; margin-bottom: 12px; }
     .modal-content p { color: var(--gray); margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
-    @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-    /* Notificación Flotante (Toast) */
     .toast-notificacion { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 16px 28px; border-radius: 20px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 2000; transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
     .toast-show { top: 25px; }
   </style>
 </head>
 <body>
 
-  <!-- MODAL 1: PERMISOS (Bienvenida) -->
+  <!-- MODAL PERMISOS -->
   <div id="modal-permisos" class="modal-overlay">
     <div class="modal-content">
       <div style="font-size: 55px; margin-bottom: 15px;">📍🔔</div>
@@ -171,7 +185,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: CONFIRMAR ALERTA GARITA -->
+  <!-- MODAL CONFIRMAR ALERTA -->
   <div id="modal-confirmacion" class="modal-overlay">
     <div class="modal-content">
       <div style="font-size: 55px; margin-bottom: 10px;">⚠️</div>
@@ -185,7 +199,21 @@
     </div>
   </div>
 
-  <!-- MODAL 3: ALERTA RECIBIDA (Para el vecino) -->
+  <!-- MODAL MENSAJE CUSTOM (GARITA) -->
+  <div id="modal-aviso-custom" class="modal-overlay">
+    <div class="modal-content">
+      <div style="font-size: 55px; margin-bottom: 10px;">📢</div>
+      <h3>Aviso General</h3>
+      <p>Escribí el mensaje que recibirán todos los vecinos:</p>
+      <textarea id="input-aviso-custom" class="custom-textarea" rows="3" placeholder="Ej: Calle 5 cortada..."></textarea>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-outline" onclick="cerrarModalAvisoCustom()" style="margin:0;">Cancelar</button>
+        <button class="btn-primary" onclick="confirmarAvisoCustom()" style="margin:0;">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ALERTA RECIBIDA -->
   <div id="modal-alerta" class="modal-overlay">
     <div class="modal-content">
       <div style="font-size: 55px; margin-bottom: 10px; animation: pulseAlert 1.5s infinite;">🚨</div>
@@ -195,22 +223,18 @@
     </div>
   </div>
 
-  <!-- TOAST NOTIFICACIÓN FLOTANTE -->
-  <div id="toast-exito" class="toast-notificacion" id="mensaje-toast">✅ Alerta enviada con éxito</div>
+  <div id="toast-exito" class="toast-notificacion">✅ Operación exitosa</div>
 
-  <!-- PANTALLA 1: INGRESO -->
+  <!-- VISTA LOGIN -->
   <div class="container vista" id="vista-login">
     <div style="font-size: 45px; margin-bottom: 10px;">🛡️</div>
     <h2>Seguridad Vecinal</h2>
     <p>Ingresá tu PIN de seguridad (4 dígitos)</p>
-    
-    <!-- Input Auto-Ejecutable -->
     <input type="password" id="inputId" class="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" oninput="chequearPin(this)">
-    
     <div id="login-error" style="color: var(--danger); margin-top: 10px; font-weight: bold;"></div>
   </div>
 
-  <!-- PANTALLA 2: VECINO -->
+  <!-- VISTA VECINO -->
   <div class="container vista" id="vista-vecino">
     <h2 id="vecino-nombre" style="font-size: 28px; margin-bottom: 5px; color: var(--primary);">Vecino</h2>
     <p id="vecino-domicilio" style="margin-bottom: 25px; font-weight: 600; color: var(--dark);"></p>
@@ -219,60 +243,45 @@
     <div id="mensaje-estado" style="min-height: 24px; margin: 15px 0; font-weight: bold; font-size: 18px;"></div>
     
     <div class="sos-container">
-      <button class="btn-danger" id="btn-sos">🚨 EMERGENCIA<br><small style="font-size: 14px; font-weight: 600; opacity: 0.9;">(Mantener presionado)</small></button>
+      <button class="btn-danger" id="btn-sos">🚨 EMERGENCIA<br><small id="sos-instruccion" style="font-size: 14px; font-weight: 600; opacity: 0.9;">(Mantener presionado)</small></button>
       <div id="sos-progress"></div>
     </div>
 
     <hr style="border: 0; border-top: 2px dashed var(--border); margin: 35px 0 25px 0;">
-    
-    <h3 style="text-align: left; font-size: 18px; margin-bottom: 15px;">Mis últimos avisos</h3>
     <button class="btn-outline" onclick="cargarHistorial()">↻ Actualizar historial</button>
     <div id="lista-historial" style="text-align: left; margin-top: 15px;"></div>
 
     <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0 15px 0;">
-    <p style="text-align: left; margin: 0 0 10px 0; font-size: 14px; font-weight: bold;">🎨 Apariencia</p>
     <div class="theme-selector">
       <button id="btn-tema-claro" onclick="cambiarTema('claro')">☀️ Claro</button>
       <button id="btn-tema-oscuro" onclick="cambiarTema('oscuro')">🌙 Oscuro</button>
       <button id="btn-tema-duotono" onclick="cambiarTema('duotono')">✨ Duo Tono</button>
     </div>
-    
-    <!-- BOTÓN CERRAR SESIÓN -->
-    <button class="btn-logout" onclick="cerrarSesion()">Cambiar usuario (Cerrar sesión)</button>
+    <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
   </div>
 
-  <!-- PANTALLA 3: GARITA -->
+  <!-- VISTA GARITA -->
   <div class="container vista" id="vista-garita">
     <h2>CENTRAL GARITA</h2>
     <button id="btn-habilitar-push" class="btn-primary" onclick="habilitarNotificaciones()" style="background:var(--warn); color:#000; box-shadow:none;">🔔 Activar Alertas</button>
-    
-    <div id="lista-avisos" style="margin-top: 25px;">
-      <div style="padding:40px 0; color:var(--gray); font-weight:bold; font-size:18px;">Iniciando sistema...</div>
-    </div>
-    
+    <div id="lista-avisos" style="margin-top: 25px;"></div>
     <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0;">
-    <h3 style="text-align:left; color:var(--gray); font-size: 14px;">EMITIR ALERTA A VECINOS</h3>
     <div class="grid-botones">
       <button onclick="abrirModalConfirmacion('Sospechoso merodeando')"><span>🕵️‍♂️</span>Sospechoso</button>
       <button onclick="abrirModalConfirmacion('Vehículo desconocido')"><span>🚘</span>Vehículo Raro</button>
       <button onclick="abrirModalConfirmacion('Ruidos molestos detectados')"><span>🔊</span>Ruidos</button>
       <button onclick="abrirModalConfirmacion('Falla de suministro eléctrico/agua')"><span>⚠️</span>Corte Luz/Agua</button>
-      <button onclick="abrirModalConfirmacion('Incendio o humo detectado')"><span>🔥</span>Incendio/Humo</button>
-      <button onclick="abrirModalConfirmacion('Aviso general de seguridad')"><span>📢</span>Aviso General</button>
+      <button onclick="abrirModalConfirmacion('Incendio o humo detectado')"><span>🔥</span>Incendio</button>
+      <button onclick="abrirModalAvisoCustom()"><span>📢</span>Aviso Gral</button>
     </div>
     <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0;">
     <button class="btn-danger" style="height: 70px; font-size: 20px;" onclick="window.location.href='tel:911'">📞 LLAMAR 911</button>
-    
-    <!-- BOTÓN CERRAR SESIÓN -->
-    <button class="btn-logout" onclick="cerrarSesion()">Cambiar turno (Cerrar sesión)</button>
+    <button class="btn-logout" onclick="cerrarSesion()">Cerrar turno</button>
   </div>
 
-  <div id="loader">Conectando de forma segura... ⏳</div>
+  <div id="loader">Conectando... ⏳</div>
 
   <script>
-    // ====================================================================
-    // CONFIGURACIÓN DE FIREBASE Y CLOUDFLARE
-    // ====================================================================
     const firebaseConfig = {
       apiKey: "AIzaSyCD5Ji6o5t4HQo_6Hpj33Sz3PzzuH0JF9Y",
       authDomain: "app-vendedores-inteligente.firebaseapp.com",
@@ -284,58 +293,38 @@
     const VAPID_KEY = "BN480IhH70femCH6611oE699tLXFGYbS4MWcTbcEMbOUkR0vIwxXPrzTjhJEB9JcizJxqu4xs91-bQsal1_Hi8o";
     const API_URL = 'https://appseguridad.santamariapablodaniel.workers.dev/';
 
-    // --- MANEJO DE TEMAS ---
     function cambiarTema(tema) {
       document.documentElement.setAttribute('data-theme', tema);
       localStorage.setItem('temaVecinal', tema);
-      
       const metaColor = document.getElementById('theme-color-meta');
       if(tema === 'oscuro') {
         metaColor.setAttribute('content', '#000000');
         document.body.classList.remove('tema-duotono-activo');
-      }
-      else if(tema === 'duotono') {
+      } else if(tema === 'duotono') {
         metaColor.setAttribute('content', '#1e3a8a');
         document.body.classList.add('tema-duotono-activo');
-      }
-      else {
+      } else {
         metaColor.setAttribute('content', '#f2f2f7');
         document.body.classList.remove('tema-duotono-activo');
       }
-
       document.querySelectorAll('.theme-selector button').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-tema-' + tema)?.classList.add('active');
     }
-    const temaGuardado = localStorage.getItem('temaVecinal') || 'claro';
-    cambiarTema(temaGuardado);
+    cambiarTema(localStorage.getItem('temaVecinal') || 'claro');
 
-    // --- INICIALIZAR FIREBASE ---
     firebase.initializeApp(firebaseConfig);
     const messaging = firebase.messaging();
 
-    let userActual = null;
-    let intEstado = null; 
-    let intGarita = null; 
-    let idPendiente = null;
-    let audioContexto = null;
-    let alertasNotificadas = new Set();
-    let alarmaReintento = null;
-    let swRegistration = null; 
-    let motivoAlertaActual = ""; 
+    let userActual = null, intEstado = null, intGarita = null, idPendiente = null, audioContexto = null;
+    let alertasNotificadas = new Set(), alarmaReintento = null, swRegistration = null, motivoAlertaActual = ""; 
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => { 
         navigator.serviceWorker.register('./firebase-messaging-sw.js')
-          .then(registration => {
-            swRegistration = registration;
-            console.log('Service Worker registrado.');
-          }).catch(err => console.log('Error en SW:', err));
-          
-        // 🚀 AUTO-LOGIN AL CARGAR LA APP
+          .then(registration => { swRegistration = registration; })
+          .catch(err => console.log('Error en SW:', err));
         const idGuardado = localStorage.getItem('idVecinal');
-        if (idGuardado) {
-           iniciarSesion(idGuardado);
-        }
+        if (idGuardado) iniciarSesion(idGuardado);
       });
     }
 
@@ -352,33 +341,25 @@
       if(id) document.getElementById(id).style.display = 'block';
     }
 
-    // NUEVO: CHEQUEO AUTOMÁTICO DE PIN
     function chequearPin(input) {
-      if (input.value.length === 4) {
-         input.blur(); // Esconde el teclado
-         iniciarSesion();
-      }
+      if (input.value.length === 4) { input.blur(); iniciarSesion(); }
     }
 
-    // Adaptado para recibir un ID guardado o leer el del input
     async function iniciarSesion(autoId = null) {
       const inputEl = document.getElementById('inputId');
       const id = autoId || inputEl.value;
       if(!id) return;
-      
       mostrar(''); document.getElementById('loader').style.display = 'block';
       const res = await api('login', { id });
       document.getElementById('loader').style.display = 'none';
-      
       if(res.error) {
-        if(autoId) localStorage.removeItem('idVecinal'); // Si falló el auto-login, lo borramos
+        if(autoId) localStorage.removeItem('idVecinal');
         document.getElementById('login-error').innerText = res.error;
-        inputEl.value = ''; // Borramos el input para que vuelva a tipear
+        inputEl.value = '';
         mostrar('vista-login');
       } else {
         userActual = res;
-        localStorage.setItem('idVecinal', id); // 💾 GUARDAR EN MEMORIA
-        
+        localStorage.setItem('idVecinal', id);
         if(res.rol.toUpperCase() === 'GUARDIA') {
           mostrar('vista-garita');
           document.getElementById('btn-habilitar-push').style.display = 'block';
@@ -388,69 +369,44 @@
           document.getElementById('vecino-domicilio').innerText = "📍 " + res.domicilio;
           mostrar('vista-vecino');
           configurarSOS(); 
-          
-          if (Notification.permission !== "granted") {
-            document.getElementById('modal-permisos').style.display = 'flex';
-          } else {
-            obtenerYGuardarToken();
-          }
+          if (Notification.permission !== "granted") document.getElementById('modal-permisos').style.display = 'flex';
+          else obtenerYGuardarToken();
         }
       }
     }
 
-    // 🚀 FUNCIÓN PARA CERRAR SESIÓN
-    function cerrarSesion() {
-      localStorage.removeItem('idVecinal'); 
-      location.reload(); 
-    }
+    function cerrarSesion() { localStorage.removeItem('idVecinal'); location.reload(); }
 
-    // --- MODALES Y UI CUSTOM ---
     function concederPermisosVecino() {
       audioContexto = new (window.AudioContext || window.webkitAudioContext)();
       if(navigator.geolocation) navigator.geolocation.getCurrentPosition(()=>{}, ()=>{});
-      
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') obtenerYGuardarToken();
-      });
+      Notification.requestPermission().then(permission => { if (permission === 'granted') obtenerYGuardarToken(); });
       document.getElementById('modal-permisos').style.display = 'none';
     }
 
     function habilitarNotificaciones() {
       document.getElementById('btn-habilitar-push').style.display = 'none';
       audioContexto = new (window.AudioContext || window.webkitAudioContext)(); 
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') obtenerYGuardarToken();
-      });
+      Notification.requestPermission().then(permission => { if (permission === 'granted') obtenerYGuardarToken(); });
     }
 
     function obtenerYGuardarToken() {
-      if (!swRegistration) {
-        setTimeout(obtenerYGuardarToken, 1000);
-        return;
-      }
+      if (!swRegistration) { setTimeout(obtenerYGuardarToken, 1000); return; }
       messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swRegistration })
         .then(currentToken => {
-          if (currentToken) {
-            console.log("Token obtenido");
-            api('guardarToken', { idUsuario: userActual.id, token: currentToken }).then(() => {
-                mostrarToastExito("🔔 Alertas vinculadas a este celular"); 
-            });
-          }
+          if (currentToken) api('guardarToken', { idUsuario: userActual.id, token: currentToken }).then(() => mostrarToastExito("🔔 Notificaciones Activas"));
         }).catch(err => console.error("Error token:", err));
     }
 
-    function mostrarToastExito(mensaje = "✅ Alerta enviada con éxito") {
+    function mostrarToastExito(mensaje) {
       const toast = document.getElementById('toast-exito');
       toast.innerText = mensaje;
       toast.classList.add('toast-show');
       setTimeout(() => toast.classList.remove('toast-show'), 3000);
     }
 
-    function cerrarModalAlerta() {
-      document.getElementById('modal-alerta').style.display = 'none';
-    }
+    function cerrarModalAlerta() { document.getElementById('modal-alerta').style.display = 'none'; }
 
-    // --- VECINO ---
     function registrarLlegada() {
       document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--gray);">Ubicando GPS...</span>';
       if(navigator.geolocation) {
@@ -458,94 +414,106 @@
           pos => procesarAviso('LLEGADA', pos.coords.latitude, pos.coords.longitude),
           err => procesarAviso('LLEGADA', null, null), { timeout: 5000 }
         );
-      } else { procesarAviso('LLEGADA', null, null); }
+      } else procesarAviso('LLEGADA', null, null);
     }
 
     async function procesarAviso(tipo, lat, lng) {
       if(navigator.vibrate) navigator.vibrate(50);
       const res = await api('registrarAviso', { usuario: userActual, tipo, lat, lng });
-      if(res.error) {
-        document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--danger)">⚠️ ${res.error}</span>`;
-      } else {
+      if(res.error) document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--danger)">⚠️ ${res.error}</span>`;
+      else {
         document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--primary)">⏳ ${res.mensaje}</span>`;
         if (tipo === 'LLEGADA') {
           idPendiente = res.idAviso;
           if(intEstado) clearInterval(intEstado);
           intEstado = setInterval(chequearConfirmacion, 5000); 
         } else if (tipo === 'SOS') {
-          const link = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : 'Sin GPS.';
-          const txt = `🚨 *EMERGENCIA VECINAL* 🚨\n\nSoy ${userActual.nombre}\nDom: ${userActual.domicilio}\nUbicación: ${link}`;
+          // MENSAJE DE WHATSAPP LIMPIO SIN GPS
+          const txt = `🚨 *EMERGENCIA VECINAL - ROBO EN PROCESO* 🚨\n\nSoy ${userActual.nombre}\nTel: ${userActual.telefono || 'Sin registro'}\nDom: ${userActual.domicilio}\n\n¡ESTOY SUFRIENDO UN ROBO! Por favor, llamen al 911 ahora mismo.`;
           window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`, '_blank');
+          
+          // BLOQUEAR EL BOTÓN FÍSICAMENTE
+          bloquearBotonSOS();
         }
       }
+    }
+
+    function bloquearBotonSOS() {
+      const btn = document.getElementById('btn-sos');
+      btn.classList.add('sos-bloqueado');
+      btn.innerHTML = '🚨 ALERTA ENVIADA';
+      document.getElementById('sos-instruccion').innerText = '(Acción completada)';
     }
 
     async function chequearConfirmacion() {
       const res = await api('verificarEstado', { idAviso: idPendiente });
       if(res.estado === 'CONFIRMADO') {
         if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--success)">✅ ¡Garita confirmada! Avanzá.</span>';
+        document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--success)">✅ ¡Visto por Garita!</span>';
         clearInterval(intEstado);
       } else if (res.estado === 'EXPIRADO') {
-        document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--danger)">❌ Expiró. El guardia no confirmó.</span>';
+        document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--danger)">❌ Aviso Expirado</span>';
         clearInterval(intEstado);
       }
     }
 
     async function cargarHistorial() {
       const datos = await api('obtenerHistorial', { idUsuario: userActual.id });
-      let html = datos.length ? datos.map(d => `<div class="historial-item"><span>${d.fecha}</span><span>${d.estado}</span></div>`).join('') : '<p>Sin registros.</p>';
-      document.getElementById('lista-historial').innerHTML = html;
+      document.getElementById('lista-historial').innerHTML = datos.length ? datos.map(d => `<div class="historial-item"><span>${d.fecha}</span><span>${d.estado}</span></div>`).join('') : '<p>Sin registros.</p>';
     }
 
     function configurarSOS() {
-      const btn = document.getElementById('btn-sos');
-      const barra = document.getElementById('sos-progress');
+      const btn = document.getElementById('btn-sos'), barra = document.getElementById('sos-progress');
       let timer, ancho = 0, iterador;
-
-      const reset = () => { clearTimeout(timer); clearInterval(iterador); ancho = 0; barra.style.width = '0%'; };
+      const reset = () => { if(btn.classList.contains('sos-bloqueado')) return; clearTimeout(timer); clearInterval(iterador); ancho = 0; barra.style.width = '0%'; };
       const press = (e) => {
+        if(btn.classList.contains('sos-bloqueado')) return;
         e.preventDefault(); reset();
         if(navigator.vibrate) navigator.vibrate(20);
         iterador = setInterval(() => { ancho += 5; barra.style.width = ancho + '%'; }, 100);
         timer = setTimeout(() => {
           clearInterval(iterador); 
           if(navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]); 
-          navigator.geolocation?.getCurrentPosition(p => procesarAviso('SOS', p.coords.latitude, p.coords.longitude), e => procesarAviso('SOS', null, null));
+          // Ya no necesitamos enviar lat/lng al procesar el aviso SOS porque quitamos el link
+          procesarAviso('SOS', null, null);
         }, 2000);
       };
       btn.addEventListener('touchstart', press, {passive: false}); btn.addEventListener('touchend', reset);
       btn.addEventListener('mousedown', press); btn.addEventListener('mouseup', reset); btn.addEventListener('mouseleave', reset);
     }
 
-    // --- GARITA ---
     function abrirModalConfirmacion(motivo) {
       motivoAlertaActual = motivo;
       document.getElementById('texto-motivo-alerta').innerText = `"${motivo}"`;
       document.getElementById('modal-confirmacion').style.display = 'flex';
     }
 
-    function cerrarModalConfirmacion() {
-      document.getElementById('modal-confirmacion').style.display = 'none';
-      motivoAlertaActual = "";
+    function cerrarModalConfirmacion() { document.getElementById('modal-confirmacion').style.display = 'none'; motivoAlertaActual = ""; }
+    function abrirModalAvisoCustom() { document.getElementById('input-aviso-custom').value = ""; document.getElementById('modal-aviso-custom').style.display = 'flex'; }
+    function cerrarModalAvisoCustom() { document.getElementById('modal-aviso-custom').style.display = 'none'; }
+
+    function confirmarAvisoCustom() {
+      const mensaje = document.getElementById('input-aviso-custom').value.trim();
+      if (!mensaje) return;
+      cerrarModalAvisoCustom();
+      abrirModalConfirmacion(mensaje);
     }
 
     document.getElementById('btn-ejecutar-alerta').addEventListener('click', async () => {
       if(!motivoAlertaActual) return;
       const motivo = motivoAlertaActual;
       cerrarModalConfirmacion();
-      
-      document.getElementById('lista-avisos').innerHTML = '<p>Enviando Alerta a Vecinos...</p>';
+      const listaDiv = document.getElementById('lista-avisos');
+      listaDiv.innerHTML = '<p>Enviando Alerta...</p>';
       await api('alertaGarita', { motivo: motivo });
-      mostrarToastExito("✅ Alerta enviada con éxito");
+      mostrarToastExito("✅ Alerta enviada");
       actualizarGarita();
     });
 
     function emitirSonidoAlarma(esSOS) {
       if(!audioContexto) return;
       if(navigator.vibrate) navigator.vibrate(esSOS ? [500,200,500,200,500] : [300, 200, 300]);
-      const osc = audioContexto.createOscillator();
-      const gain = audioContexto.createGain();
+      const osc = audioContexto.createOscillator(), gain = audioContexto.createGain();
       osc.type = esSOS ? 'sawtooth' : 'sine';
       osc.frequency.setValueAtTime(esSOS ? 880 : 660, audioContexto.currentTime);
       if(esSOS) osc.frequency.exponentialRampToValueAtTime(440, audioContexto.currentTime + 0.5);
@@ -553,56 +521,37 @@
       osc.start(); gain.gain.exponentialRampToValueAtTime(0.00001, audioContexto.currentTime + 1); osc.stop(audioContexto.currentTime + 1);
     }
 
-    function loopGarita() {
-      actualizarGarita();
-      intGarita = setInterval(actualizarGarita, 5000); 
-    }
+    function loopGarita() { actualizarGarita(); intGarita = setInterval(actualizarGarita, 5000); }
 
     async function actualizarGarita() {
-      const avisos = await api('obtenerAvisos');
-      const div = document.getElementById('lista-avisos');
-      
+      const avisos = await api('obtenerAvisos'), div = document.getElementById('lista-avisos');
       if(avisos.error || !avisos.length) {
-        div.innerHTML = '<div style="padding:50px 0; color:var(--gray); font-weight:600; font-size:18px;">✔️ Todo tranquilo.<br><small>Sin alertas pendientes.</small></div>';
+        div.innerHTML = '<div style="padding:50px 0; color:var(--gray); font-weight:600; font-size:18px;">✔️ Sin alertas pendientes.</div>';
         if(alarmaReintento) { clearInterval(alarmaReintento); alarmaReintento = null; }
         return;
       }
-
       let hayEmergencia = false, hayPendientesNuevos = false;
       div.innerHTML = avisos.map(a => {
         if(a.tipo === 'SOS') hayEmergencia = true;
-        if(!alertasNotificadas.has(a.id)) {
-          alertasNotificadas.add(a.id);
-          emitirSonidoAlarma(a.tipo === 'SOS'); 
-        }
+        if(!alertasNotificadas.has(a.id)) { alertasNotificadas.add(a.id); emitirSonidoAlarma(a.tipo === 'SOS'); }
         hayPendientesNuevos = true;
-        let icono = a.tipo === 'SOS' ? '🚨 SOS' : '🚗 LLEGANDO';
-        return `
-        <div class="tarjeta ${a.tipo === 'SOS' ? 'sos' : ''}">
-          <h3 style="margin:0; font-size: 22px; color: ${a.tipo === 'SOS' ? 'var(--danger)' : 'var(--primary)'};">${icono}</h3>
+        return `<div class="tarjeta ${a.tipo === 'SOS' ? 'sos' : ''}">
+          <h3 style="margin:0; font-size: 22px; color: ${a.tipo === 'SOS' ? 'var(--danger)' : 'var(--primary)'};">${a.tipo === 'SOS' ? '🚨 SOS' : '🚗 LLEGANDO'}</h3>
           <p style="font-size:22px; margin: 12px 0; font-weight: 800; color: var(--dark);">${a.domicilio}</p>
-          <p style="font-size: 16px; margin: 0; color: var(--gray);"><b>${a.nombre}</b><br>Hace ${a.tiempo} min</p>
-          <div class="acciones-garita">
-            <button class="btn-success" onclick="confirmarGarita('${a.id}')">CONFIRMAR VISTA</button>
-          </div>
+          <p style="font-size: 16px; margin: 0; color: var(--gray);"><b>${a.nombre}</b> - Hace ${a.tiempo} min</p>
+          <div class="acciones-garita"><button class="btn-success" onclick="confirmarGarita('${a.id}')">CONFIRMAR VISTA</button></div>
         </div>`;
       }).join('');
-      
-      if(hayPendientesNuevos && !alarmaReintento) {
-        alarmaReintento = setInterval(() => { emitirSonidoAlarma(hayEmergencia); }, 15000);
-      }
+      if(hayPendientesNuevos && !alarmaReintento) alarmaReintento = setInterval(() => { emitirSonidoAlarma(hayEmergencia); }, 15000);
     }
 
     async function confirmarGarita(id) {
       if(navigator.vibrate) navigator.vibrate(50);
-      document.getElementById('lista-avisos').innerHTML = '<p style="font-weight:bold; color:var(--primary);">Registrando...</p>';
       await api('confirmarAviso', { idAviso: id });
       actualizarGarita(); 
     }
 
-    // Escucha notificaciones cuando la app está abierta en pantalla
     messaging.onMessage((payload) => {
-      console.log('Push recibido', payload);
       emitirSonidoAlarma(true);
       if(userActual && userActual.rol.toUpperCase() === 'VECINO') {
          document.getElementById('texto-alerta-recibida').innerText = payload.notification.body;
