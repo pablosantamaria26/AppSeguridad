@@ -12,24 +12,18 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function(payload) {
-  console.log('Push recibido en segundo plano:', payload);
-  
-  const notificationTitle = payload.notification.title || "Alerta Vecinal";
-  const notificationOptions = {
-    body: payload.notification.body,
-    // CORRECCIÓN CRÍTICA: Quitamos la barra "/" para que no dé error 404 en GitHub Pages
-    icon: 'icono.png', 
-    badge: 'icono.png',
-    vibrate: [500, 200, 500, 200, 500],
-    requireInteraction: true // Hace que la notificación no desaparezca sola
-  };
-  
-  return self.registration.showNotification(notificationTitle, notificationOptions);
-});
+// 1. SOLUCIÓN NOTIFICACIÓN DOBLE:
+// Firebase ya crea la alerta automáticamente. Quitamos nuestro código manual.
 
-// NUEVO: Esto hace que al tocar la notificación en la pantalla de bloqueo, se abra la app
+// 2. ACCIÓN AL TOCAR LA NOTIFICACIÓN:
+// Esto asegura que si el vecino toca la alerta en la pantalla de bloqueo, se abra la app.
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
   event.waitUntil(clients.openWindow('./index.html'));
+});
+
+// 3. SOLUCIÓN PARA EL BOTÓN DE INSTALAR EN PC (PWA):
+// Chrome y Edge exigen este evento "fetch" para validar que es una App real.
+self.addEventListener('fetch', function(event) {
+  // Lo dejamos vacío, pero su sola existencia habilita el botón de instalación.
 });
