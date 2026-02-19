@@ -16,13 +16,15 @@
 
   <style>
     /* ==========================================
-       VARIABLES DE TEMAS (Cambian dinámicamente)
+       VARIABLES DE TEMAS Y DISEÑO
        ========================================== */
     :root { 
       --primary: #007aff; --success: #34c759; --danger: #ff3b30; 
       --dark: #1c1c1e; --gray: #8e8e93; --bg-color: #f2f2f7; 
       --card-bg: #ffffff; --warn: #ffcc00; --text-main: #1c1c1e;
       --input-bg: #fafafa; --border: #e5e5ea;
+      --glass-blur: blur(0px);
+      --bg-gradient: linear-gradient(135deg, #4b5563 0%, #e2e8f0 100%);
     }
 
     [data-theme="oscuro"] {
@@ -30,75 +32,131 @@
       --dark: #ffffff; --gray: #98989d; --bg-color: #000000; 
       --card-bg: #1c1c1e; --warn: #ffd60a; --text-main: #ffffff;
       --input-bg: #2c2c2e; --border: #38383a;
+      --glass-blur: blur(0px);
+      --bg-gradient: linear-gradient(135deg, #09090b 0%, #27272a 100%);
     }
 
-    [data-theme="elegante"] {
-      --primary: #0ea5e9; --success: #10b981; --danger: #ef4444; 
-      --dark: #f8fafc; --gray: #94a3b8; --bg-color: #0f172a; 
-      --card-bg: #1e293b; --warn: #f59e0b; --text-main: #f8fafc;
-      --input-bg: #0f172a; --border: #334155;
+    /* TEMA DUO TONO (Premium Glassmorphism) */
+    [data-theme="duotono"] {
+      --primary: #38bdf8; --success: #10b981; --danger: #f43f5e; 
+      --dark: #ffffff; --gray: #cbd5e1; --bg-color: transparent; 
+      --card-bg: rgba(15, 23, 42, 0.65); --warn: #fbbf24; --text-main: #f8fafc;
+      --input-bg: rgba(255, 255, 255, 0.1); --border: rgba(255, 255, 255, 0.15);
+      --glass-blur: blur(16px);
+      --bg-gradient: linear-gradient(-45deg, #1e3a8a, #7e22ce, #0f172a, #be185d);
     }
 
-    /* Diseño Base */
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); margin: 0; padding: 15px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; color: var(--text-main); transition: background-color 0.3s ease, color 0.3s ease; }
-    .container { width: 100%; max-width: 420px; background: var(--card-bg); padding: 30px 25px; border-radius: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); text-align: center; margin-top: 10px; transition: background-color 0.3s ease; }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; 
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      margin: 0; padding: 15px; display: flex; justify-content: center; align-items: flex-start; 
+      min-height: 100vh; color: var(--text-main); 
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* Activación del fondo animado solo para el Duo Tono */
+    body.tema-duotono-activo {
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    .container { 
+      width: 100%; max-width: 420px; 
+      background: var(--card-bg); 
+      padding: 35px 25px; 
+      border-radius: 28px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
+      text-align: center; margin-top: 10px; 
+      transition: all 0.4s ease; 
+      position: relative;
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
+    }
+
     h2 { margin-top: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--dark); }
-    p { color: var(--gray); font-size: 15px; line-height: 1.4; }
+    p { color: var(--gray); font-size: 15px; line-height: 1.5; }
 
-    input { width: 100%; padding: 18px; margin: 20px 0; border: 2px solid var(--border); border-radius: 16px; font-size: 20px; font-weight: 600; text-align: center; background-color: var(--input-bg); color: var(--text-main); transition: all 0.2s ease; }
-    input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); }
+    /* ESTILO ESPECIAL PARA EL PIN - CORREGIDO CENTRADO */
+    .pin-input { 
+      width: 100%; padding: 20px 0; margin: 25px 0; 
+      border: 2px solid var(--border); border-radius: 20px; 
+      font-size: 34px; font-weight: 800; text-align: center; 
+      letter-spacing: 18px; 
+      text-indent: 18px; /* Compensa el desfase del letter-spacing */
+      font-family: monospace;
+      background-color: var(--input-bg); color: var(--text-main); 
+      transition: all 0.3s ease; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .pin-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); }
 
-    button { width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 20px; font-size: 19px; font-weight: 700; color: white; cursor: pointer; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 6px 16px rgba(0,0,0,0.15); position: relative; overflow: hidden; }
-    button:active { transform: scale(0.94) translateY(2px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    button { 
+      width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 22px; 
+      font-size: 19px; font-weight: 700; color: white; cursor: pointer; 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15); position: relative; overflow: hidden; 
+    }
+    button:active { transform: scale(0.95) translateY(2px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     
-    .btn-primary { background: var(--primary); box-shadow: 0 6px 20px rgba(0, 122, 255, 0.2); }
-    .btn-success { background: var(--success); height: 110px; font-size: 24px; box-shadow: 0 8px 25px rgba(52, 199, 89, 0.3); }
-    .btn-danger { background: var(--danger); height: 100px; font-size: 22px; box-shadow: 0 8px 25px rgba(255, 59, 48, 0.3); }
-    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 14px; font-size: 16px; box-shadow: none;}
+    .btn-primary { background: var(--primary); box-shadow: 0 6px 20px rgba(0, 122, 255, 0.25); }
+    
+    /* Botones Vecino (Súper estéticos) */
+    .btn-success { background: linear-gradient(135deg, var(--success), #28a745); height: 110px; font-size: 24px; box-shadow: 0 10px 25px rgba(52, 199, 89, 0.35); }
+    .btn-danger { background: linear-gradient(135deg, var(--danger), #d32f2f); height: 100px; font-size: 22px; box-shadow: 0 10px 25px rgba(255, 59, 48, 0.35); }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--border); padding: 14px; font-size: 15px; box-shadow: none; border-radius: 16px;}
+    
+    .btn-logout { background: transparent; color: var(--gray); box-shadow: none; font-size: 14px; padding: 10px; margin-top: 20px; text-decoration: underline; border-radius: 10px;}
 
-    .vista { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .vista { display: none; animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
     #vista-login { display: block; } 
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-    .historial-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 500; }
+    .historial-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; color: var(--dark);}
     .historial-item:last-child { border-bottom: none; }
     
-    .tarjeta { border: none; border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: left; background: var(--input-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.08); position: relative; overflow: hidden; }
+    .tarjeta { border: none; border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: left; background: var(--input-bg); box-shadow: 0 8px 25px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
     .tarjeta::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: var(--primary); }
     .tarjeta.sos::before { background: var(--danger); }
-    .tarjeta.sos { background: rgba(255, 59, 48, 0.1); animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
+    .tarjeta.sos { background: rgba(255, 59, 48, 0.08); animation: pulseAlert 2s infinite; }
+    @keyframes pulseAlert { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
 
     .acciones-garita { display: flex; gap: 10px; flex-direction: column; margin-top: 20px; }
-    .acciones-garita button { margin: 0; height: 70px; font-size: 20px; }
+    .acciones-garita button { margin: 0; height: 70px; font-size: 20px; border-radius: 18px;}
     
     #loader { display: none; font-weight: bold; color: var(--primary); margin: 20px 0; font-size: 18px; }
-    .sos-container { position: relative; width: 100%; border-radius: 20px; margin-top: 20px; }
-    #sos-progress { position: absolute; bottom: 0; left: 0; height: 100%; background: rgba(0,0,0,0.4); width: 0%; pointer-events: none; border-radius: 20px; transition: width 0.1s linear;}
+    .sos-container { position: relative; width: 100%; border-radius: 22px; margin-top: 20px; overflow: hidden; }
+    #sos-progress { position: absolute; bottom: 0; left: 0; height: 100%; background: rgba(0,0,0,0.3); width: 0%; pointer-events: none; transition: width 0.1s linear;}
 
-    /* Botonera de Garita */
-    .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-    .grid-botones button { padding: 15px 10px; height: 90px; font-size: 14px; margin: 0; background: var(--card-bg); color: var(--dark); border: 2px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-    .grid-botones button span { font-size: 24px; display: block; margin-bottom: 5px; }
+    /* PROTECCIÓN DEL DISEÑO DE GARITA (Mantiene su estilo sólido y rápido) */
+    #vista-garita.container { backdrop-filter: none; background: var(--card-bg); border: none; }
+    .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+    .grid-botones button { padding: 15px 10px; height: 95px; font-size: 14px; margin: 0; background: var(--input-bg); color: var(--dark); border: 2px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 18px;}
+    .grid-botones button span { font-size: 26px; display: block; margin-bottom: 5px; }
     .grid-botones button:active { background: var(--border); border-color: var(--primary); }
 
     /* Selector de Temas */
     .theme-selector { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
-    .theme-selector button { padding: 10px; font-size: 13px; height: auto; margin: 0; border-radius: 12px; background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border); box-shadow: none; }
+    .theme-selector button { padding: 12px; font-size: 13px; height: auto; margin: 0; border-radius: 14px; background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border); box-shadow: none; font-weight: 600;}
     .theme-selector button:active { background: var(--border); }
-    .theme-selector button.active { border-color: var(--primary); background: rgba(0, 122, 255, 0.1); color: var(--primary); font-weight: bold; }
+    .theme-selector button.active { border-color: var(--primary); background: rgba(0, 122, 255, 0.1); color: var(--primary); }
 
-    /* Modales de UI/UX (Reemplazan a los alert/confirm nativos) */
-    .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease; }
-    .modal-content { background: var(--card-bg); padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-    .modal-content h3 { margin-top: 0; color: var(--dark); font-size: 24px; margin-bottom: 10px; }
+    /* Modales de UI/UX */
+    .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: fadeInModal 0.3s ease; }
+    .modal-content { background: var(--card-bg); padding: 35px 30px; border-radius: 28px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid var(--border); }
+    .modal-content h3 { margin-top: 0; color: var(--dark); font-size: 24px; margin-bottom: 12px; }
     .modal-content p { color: var(--gray); margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
     /* Notificación Flotante (Toast) */
-    .toast-notificacion { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 15px 25px; border-radius: 16px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 2000; transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    .toast-show { top: 20px; }
+    .toast-notificacion { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 16px 28px; border-radius: 20px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 2000; transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .toast-show { top: 25px; }
   </style>
 </head>
 <body>
@@ -108,7 +166,7 @@
     <div class="modal-content">
       <div style="font-size: 55px; margin-bottom: 15px;">📍🔔</div>
       <h3>Permisos Necesarios</h3>
-      <p>Para que la garita sepa que estás cerca y puedas recibir alertas críticas, necesitamos tu permiso de ubicación y notificaciones.</p>
+      <p>Para que la garita sepa que estás cerca y puedas recibir alertas, necesitamos tu permiso de ubicación y notificaciones.</p>
       <button class="btn-primary" onclick="concederPermisosVecino()">¡Habilitar Todo!</button>
     </div>
   </div>
@@ -130,7 +188,7 @@
   <!-- MODAL 3: ALERTA RECIBIDA (Para el vecino) -->
   <div id="modal-alerta" class="modal-overlay">
     <div class="modal-content">
-      <div style="font-size: 55px; margin-bottom: 10px;">🚨</div>
+      <div style="font-size: 55px; margin-bottom: 10px; animation: pulseAlert 1.5s infinite;">🚨</div>
       <h3 style="color: var(--danger);">ALERTA DE GARITA</h3>
       <p id="texto-alerta-recibida" style="font-size: 20px; font-weight: bold; color: var(--dark);"></p>
       <button class="btn-primary" onclick="cerrarModalAlerta()">Entendido</button>
@@ -142,12 +200,14 @@
 
   <!-- PANTALLA 1: INGRESO -->
   <div class="container vista" id="vista-login">
-    <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
+    <div style="font-size: 45px; margin-bottom: 10px;">🛡️</div>
     <h2>Seguridad Vecinal</h2>
-    <p>Ingresá el DNI o Lote de tu domicilio.</p>
-    <input type="number" id="inputId" inputmode="numeric" placeholder="ID de usuario">
-    <button class="btn-primary" onclick="iniciarSesion()">Ingresar</button>
-    <div id="login-error" style="color: var(--danger); margin-top: 15px; font-weight: bold;"></div>
+    <p>Ingresá tu PIN de seguridad (4 dígitos)</p>
+    
+    <!-- Input Auto-Ejecutable -->
+    <input type="password" id="inputId" class="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" oninput="chequearPin(this)">
+    
+    <div id="login-error" style="color: var(--danger); margin-top: 10px; font-weight: bold;"></div>
   </div>
 
   <!-- PANTALLA 2: VECINO -->
@@ -159,23 +219,26 @@
     <div id="mensaje-estado" style="min-height: 24px; margin: 15px 0; font-weight: bold; font-size: 18px;"></div>
     
     <div class="sos-container">
-      <button class="btn-danger" id="btn-sos">🚨 EMERGENCIA<br><small style="font-size: 14px; font-weight: normal;">(Mantener presionado)</small></button>
+      <button class="btn-danger" id="btn-sos">🚨 EMERGENCIA<br><small style="font-size: 14px; font-weight: 600; opacity: 0.9;">(Mantener presionado)</small></button>
       <div id="sos-progress"></div>
     </div>
 
     <hr style="border: 0; border-top: 2px dashed var(--border); margin: 35px 0 25px 0;">
     
-    <h3 style="text-align: left; font-size: 18px; margin-bottom: 10px;">Mis últimos avisos</h3>
+    <h3 style="text-align: left; font-size: 18px; margin-bottom: 15px;">Mis últimos avisos</h3>
     <button class="btn-outline" onclick="cargarHistorial()">↻ Actualizar historial</button>
     <div id="lista-historial" style="text-align: left; margin-top: 15px;"></div>
 
     <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0 15px 0;">
-    <p style="text-align: left; margin: 0 0 5px 0; font-size: 14px; font-weight: bold;">🎨 Apariencia de la App</p>
+    <p style="text-align: left; margin: 0 0 10px 0; font-size: 14px; font-weight: bold;">🎨 Apariencia</p>
     <div class="theme-selector">
       <button id="btn-tema-claro" onclick="cambiarTema('claro')">☀️ Claro</button>
       <button id="btn-tema-oscuro" onclick="cambiarTema('oscuro')">🌙 Oscuro</button>
-      <button id="btn-tema-elegante" onclick="cambiarTema('elegante')">🌌 Elegante</button>
+      <button id="btn-tema-duotono" onclick="cambiarTema('duotono')">✨ Duo Tono</button>
     </div>
+    
+    <!-- BOTÓN CERRAR SESIÓN -->
+    <button class="btn-logout" onclick="cerrarSesion()">Cambiar usuario (Cerrar sesión)</button>
   </div>
 
   <!-- PANTALLA 3: GARITA -->
@@ -199,9 +262,12 @@
     </div>
     <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0;">
     <button class="btn-danger" style="height: 70px; font-size: 20px;" onclick="window.location.href='tel:911'">📞 LLAMAR 911</button>
+    
+    <!-- BOTÓN CERRAR SESIÓN -->
+    <button class="btn-logout" onclick="cerrarSesion()">Cambiar turno (Cerrar sesión)</button>
   </div>
 
-  <div id="loader">Conectando... ⏳</div>
+  <div id="loader">Conectando de forma segura... ⏳</div>
 
   <script>
     // ====================================================================
@@ -224,9 +290,18 @@
       localStorage.setItem('temaVecinal', tema);
       
       const metaColor = document.getElementById('theme-color-meta');
-      if(tema === 'oscuro') metaColor.setAttribute('content', '#000000');
-      else if(tema === 'elegante') metaColor.setAttribute('content', '#0f172a');
-      else metaColor.setAttribute('content', '#f2f2f7');
+      if(tema === 'oscuro') {
+        metaColor.setAttribute('content', '#000000');
+        document.body.classList.remove('tema-duotono-activo');
+      }
+      else if(tema === 'duotono') {
+        metaColor.setAttribute('content', '#1e3a8a');
+        document.body.classList.add('tema-duotono-activo');
+      }
+      else {
+        metaColor.setAttribute('content', '#f2f2f7');
+        document.body.classList.remove('tema-duotono-activo');
+      }
 
       document.querySelectorAll('.theme-selector button').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-tema-' + tema)?.classList.add('active');
@@ -255,6 +330,12 @@
             swRegistration = registration;
             console.log('Service Worker registrado.');
           }).catch(err => console.log('Error en SW:', err));
+          
+        // 🚀 AUTO-LOGIN AL CARGAR LA APP
+        const idGuardado = localStorage.getItem('idVecinal');
+        if (idGuardado) {
+           iniciarSesion(idGuardado);
+        }
       });
     }
 
@@ -271,18 +352,32 @@
       if(id) document.getElementById(id).style.display = 'block';
     }
 
-    async function iniciarSesion() {
-      const id = document.getElementById('inputId').value;
+    // NUEVO: CHEQUEO AUTOMÁTICO DE PIN
+    function chequearPin(input) {
+      if (input.value.length === 4) {
+         input.blur(); // Esconde el teclado
+         iniciarSesion();
+      }
+    }
+
+    // Adaptado para recibir un ID guardado o leer el del input
+    async function iniciarSesion(autoId = null) {
+      const inputEl = document.getElementById('inputId');
+      const id = autoId || inputEl.value;
       if(!id) return;
+      
       mostrar(''); document.getElementById('loader').style.display = 'block';
       const res = await api('login', { id });
       document.getElementById('loader').style.display = 'none';
       
       if(res.error) {
+        if(autoId) localStorage.removeItem('idVecinal'); // Si falló el auto-login, lo borramos
         document.getElementById('login-error').innerText = res.error;
+        inputEl.value = ''; // Borramos el input para que vuelva a tipear
         mostrar('vista-login');
       } else {
         userActual = res;
+        localStorage.setItem('idVecinal', id); // 💾 GUARDAR EN MEMORIA
         
         if(res.rol.toUpperCase() === 'GUARDIA') {
           mostrar('vista-garita');
@@ -301,6 +396,12 @@
           }
         }
       }
+    }
+
+    // 🚀 FUNCIÓN PARA CERRAR SESIÓN
+    function cerrarSesion() {
+      localStorage.removeItem('idVecinal'); 
+      location.reload(); 
     }
 
     // --- MODALES Y UI CUSTOM ---
@@ -332,7 +433,7 @@
           if (currentToken) {
             console.log("Token obtenido");
             api('guardarToken', { idUsuario: userActual.id, token: currentToken }).then(() => {
-                mostrarToastExito("🔔 Alertas vinculadas a este celular"); // Feedback visual de que funcionó
+                mostrarToastExito("🔔 Alertas vinculadas a este celular"); 
             });
           }
         }).catch(err => console.error("Error token:", err));
@@ -504,7 +605,6 @@
       console.log('Push recibido', payload);
       emitirSonidoAlarma(true);
       if(userActual && userActual.rol.toUpperCase() === 'VECINO') {
-         // Reemplazamos el alert() nativo por el modal custom
          document.getElementById('texto-alerta-recibida').innerText = payload.notification.body;
          document.getElementById('modal-alerta').style.display = 'flex';
       }
