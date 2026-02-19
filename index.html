@@ -86,9 +86,26 @@
     .theme-selector button { padding: 10px; font-size: 13px; height: auto; margin: 0; border-radius: 12px; background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border); box-shadow: none; }
     .theme-selector button:active { background: var(--border); }
     .theme-selector button.active { border-color: var(--primary); background: rgba(0, 122, 255, 0.1); color: var(--primary); font-weight: bold; }
+
+    /* Modal de Permisos (UI/UX) */
+    .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease; }
+    .modal-content { background: var(--card-bg); padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .modal-content h3 { margin-top: 0; color: var(--dark); font-size: 24px; }
+    .modal-content p { color: var(--gray); margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 <body>
+
+  <!-- MODAL DE PERMISOS -->
+  <div id="modal-permisos" class="modal-overlay">
+    <div class="modal-content">
+      <div style="font-size: 55px; margin-bottom: 15px;">📍🔔</div>
+      <h3>Permisos Necesarios</h3>
+      <p>Para que la garita sepa que estás cerca y puedas recibir alertas críticas, necesitamos tu permiso de ubicación y notificaciones.</p>
+      <button class="btn-primary" onclick="concederPermisosVecino()">¡Habilitar Todo!</button>
+    </div>
+  </div>
 
   <!-- PANTALLA 1: INGRESO -->
   <div class="container vista" id="vista-login">
@@ -174,13 +191,11 @@
       document.documentElement.setAttribute('data-theme', tema);
       localStorage.setItem('temaVecinal', tema);
       
-      // Actualizar meta tag color para móviles
       const metaColor = document.getElementById('theme-color-meta');
       if(tema === 'oscuro') metaColor.setAttribute('content', '#000000');
       else if(tema === 'elegante') metaColor.setAttribute('content', '#0f172a');
       else metaColor.setAttribute('content', '#f2f2f7');
 
-      // Actualizar botones visuales
       document.querySelectorAll('.theme-selector button').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-tema-' + tema)?.classList.add('active');
     }
@@ -199,9 +214,19 @@
     let audioContexto = null;
     let alertasNotificadas = new Set();
     let alarmaReintento = null;
+    let swRegistration = null; // Guardamos el registro del Service Worker aquí
 
+    // Registrar Service Worker de forma segura para GitHub Pages
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('firebase-messaging-sw.js'); });
+      window.addEventListener('load', () => { 
+        // El "./" es vital para que funcione dentro de la carpeta de GitHub Pages
+        navigator.serviceWorker.register('./firebase-messaging-sw.js')
+          .then(registration => {
+            swRegistration = registration;
+            console.log('Service Worker registrado correctamente.');
+          })
+          .catch(err => console.log('Error en Service Worker:', err));
+      });
     }
 
     async function api(accion, payload = {}) {
@@ -229,31 +254,71 @@
         mostrar('vista-login');
       } else {
         userActual = res;
-        habilitarNotificaciones(); 
         
         if(res.rol.toUpperCase() === 'GUARDIA') {
           mostrar('vista-garita');
+          document.getElementById('btn-habilitar-push').style.display = 'block';
           loopGarita(); 
         } else {
           document.getElementById('vecino-nombre').innerText = res.nombre;
           document.getElementById('vecino-domicilio').innerText = "📍 " + res.domicilio;
           mostrar('vista-vecino');
           configurarSOS(); 
+          
+          // Lógica del Modal de Permisos para Vecinos
+          if (Notification.permission !== "granted") {
+            document.getElementById('modal-permisos').style.display = 'flex';
+          } else {
+            obtenerYGuardarToken();
+          }
         }
       }
     }
 
+    // Modal de permisos de Bienvenida
+    function concederPermisosVecino() {
+      audioContexto = new (window.AudioContext || window.webkitAudioContext)(); // Prepara el audio
+      
+      // Pedir ubicación
+      if(navigator.geolocation) navigator.geolocation.getCurrentPosition(()=>{}, ()=>{});
+      
+      // Pedir notificaciones
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          obtenerYGuardarToken();
+        }
+      });
+      
+      document.getElementById('modal-permisos').style.display = 'none';
+    }
+
+    // Botón manual para la garita
     function habilitarNotificaciones() {
-      if(document.getElementById('btn-habilitar-push')) document.getElementById('btn-habilitar-push').style.display = 'none';
+      document.getElementById('btn-habilitar-push').style.display = 'none';
       audioContexto = new (window.AudioContext || window.webkitAudioContext)(); 
       
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          messaging.getToken({ vapidKey: VAPID_KEY }).then(currentToken => {
-            if (currentToken) api('guardarToken', { idUsuario: userActual.id, token: currentToken });
-          });
+          obtenerYGuardarToken();
         }
       });
+    }
+
+    // Función segura para obtener el Token y mandarlo a Google Sheets
+    function obtenerYGuardarToken() {
+      if (!swRegistration) {
+        // Si el Service Worker no cargó aún, espera 1 segundo e intenta de nuevo
+        setTimeout(obtenerYGuardarToken, 1000);
+        return;
+      }
+      // Pasamos explicitamente el SW a Firebase para evitar el error 404
+      messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swRegistration })
+        .then(currentToken => {
+          if (currentToken) {
+            console.log("Token obtenido, guardando en DB...");
+            api('guardarToken', { idUsuario: userActual.id, token: currentToken });
+          }
+        }).catch(err => console.error("Error al obtener el token:", err));
     }
 
     // --- VECINO ---
