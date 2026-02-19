@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vecinal-v4';
+const CACHE_NAME = 'vecinal-v5';
 const urlsToCache = [
   './',
   './index.html',
