@@ -74,25 +74,27 @@
     // --- REGISTRO SERVICE WORKER ---
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(reg => console.log('SW Registrado')).catch(err => console.log('SW Error', err));
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('SW Registrado'))
+          .catch(err => console.log('SW Error', err));
       });
     }
 
     // --- CONFIGURACIÓN API ---
-    const API_URL = 'AQUI_PEGA_LA_URL_DE_TU_WEBAPP_DE_APPS_SCRIPT';
+    // IMPORTANTE: Pegá acá la URL que te dio Cloudflare Workers (termina en .workers.dev)
+    const API_URL = 'https://appseguridad.santamariapablodaniel.workers.dev/';
     
     let userActual = null;
     let intEstado = null;
     let intGarita = null;
     let idPendiente = null;
 
-    // --- NÚCLEO FETCH (Resuelve CORS) ---
+    // --- NÚCLEO FETCH (Limpio gracias al Worker) ---
     async function api(accion, payload = {}) {
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          redirect: 'follow',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Clave para evitar OPTIONS preflight
+          headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ accion, payload })
         });
         return await res.json();
@@ -157,7 +159,9 @@
           if(intEstado) clearInterval(intEstado);
           intEstado = setInterval(chequearConfirmacion, 5000);
         } else if (tipo === 'SOS') {
-          const txt = `🚨 *EMERGENCIA* 🚨\nSoy ${userActual.nombre}\nDom: ${userActual.domicilio}\nUbicación: https://maps.google.com/?q=${lat},${lng}`;
+          // Genera el link correcto de Google Maps
+          const linkUbicacion = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : 'Ubicación GPS no disponible';
+          const txt = `🚨 *EMERGENCIA* 🚨\nSoy ${userActual.nombre}\nDom: ${userActual.domicilio}\nUbicación: ${linkUbicacion}`;
           window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`, '_blank');
         }
       }
@@ -193,7 +197,10 @@
         iterador = setInterval(() => { ancho += 5; barra.style.width = ancho + '%'; }, 100);
         timer = setTimeout(() => {
           clearInterval(iterador); navigator.vibrate?.([200,200,200]);
-          navigator.geolocation?.getCurrentPosition(p => procesarAviso('SOS', p.coords.latitude, p.coords.longitude), e => procesarAviso('SOS', null, null));
+          navigator.geolocation?.getCurrentPosition(
+            p => procesarAviso('SOS', p.coords.latitude, p.coords.longitude), 
+            e => procesarAviso('SOS', null, null)
+          );
         }, 2000);
       };
       
