@@ -13,12 +13,23 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
-  const notificationTitle = payload.notification.title;
+  console.log('Push recibido en segundo plano:', payload);
+  
+  const notificationTitle = payload.notification.title || "Alerta Vecinal";
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/icono.png',
-    badge: '/icono.png',
-    vibrate: [500, 200, 500, 200, 500]
+    // CORRECCIÓN CRÍTICA: Quitamos la barra "/" para que no dé error 404 en GitHub Pages
+    icon: 'icono.png', 
+    badge: 'icono.png',
+    vibrate: [500, 200, 500, 200, 500],
+    requireInteraction: true // Hace que la notificación no desaparezca sola
   };
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  
+  return self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// NUEVO: Esto hace que al tocar la notificación en la pantalla de bloqueo, se abra la app
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(clients.openWindow('./index.html'));
 });
