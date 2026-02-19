@@ -138,7 +138,7 @@
   </div>
 
   <!-- TOAST NOTIFICACIÓN FLOTANTE -->
-  <div id="toast-exito" class="toast-notificacion">✅ Alerta enviada con éxito</div>
+  <div id="toast-exito" class="toast-notificacion" id="mensaje-toast">✅ Alerta enviada con éxito</div>
 
   <!-- PANTALLA 1: INGRESO -->
   <div class="container vista" id="vista-login">
@@ -246,7 +246,7 @@
     let alertasNotificadas = new Set();
     let alarmaReintento = null;
     let swRegistration = null; 
-    let motivoAlertaActual = ""; // Guarda el motivo temporalmente para el modal
+    let motivoAlertaActual = ""; 
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => { 
@@ -331,13 +331,16 @@
         .then(currentToken => {
           if (currentToken) {
             console.log("Token obtenido");
-            api('guardarToken', { idUsuario: userActual.id, token: currentToken });
+            api('guardarToken', { idUsuario: userActual.id, token: currentToken }).then(() => {
+                mostrarToastExito("🔔 Alertas vinculadas a este celular"); // Feedback visual de que funcionó
+            });
           }
         }).catch(err => console.error("Error token:", err));
     }
 
-    function mostrarToastExito() {
+    function mostrarToastExito(mensaje = "✅ Alerta enviada con éxito") {
       const toast = document.getElementById('toast-exito');
+      toast.innerText = mensaje;
       toast.classList.add('toast-show');
       setTimeout(() => toast.classList.remove('toast-show'), 3000);
     }
@@ -433,7 +436,7 @@
       
       document.getElementById('lista-avisos').innerHTML = '<p>Enviando Alerta a Vecinos...</p>';
       await api('alertaGarita', { motivo: motivo });
-      mostrarToastExito();
+      mostrarToastExito("✅ Alerta enviada con éxito");
       actualizarGarita();
     });
 
