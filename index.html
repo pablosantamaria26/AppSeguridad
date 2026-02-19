@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#f0f2f5" id="theme-color-meta">
   <title>Alerta Vecinal</title>
   
+  <!-- Fundamental para iPhone -->
+  <link rel="apple-touch-icon" href="icono.png">
   <link rel="manifest" href="manifest.json">
   
   <!-- SDK de Firebase -->
@@ -87,17 +89,21 @@
     .theme-selector button:active { background: var(--border); }
     .theme-selector button.active { border-color: var(--primary); background: rgba(0, 122, 255, 0.1); color: var(--primary); font-weight: bold; }
 
-    /* Modal de Permisos (UI/UX) */
+    /* Modales de UI/UX (Reemplazan a los alert/confirm nativos) */
     .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); animation: fadeIn 0.3s ease; }
     .modal-content { background: var(--card-bg); padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-    .modal-content h3 { margin-top: 0; color: var(--dark); font-size: 24px; }
+    .modal-content h3 { margin-top: 0; color: var(--dark); font-size: 24px; margin-bottom: 10px; }
     .modal-content p { color: var(--gray); margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Notificación Flotante (Toast) */
+    .toast-notificacion { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 15px 25px; border-radius: 16px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 2000; transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .toast-show { top: 20px; }
   </style>
 </head>
 <body>
 
-  <!-- MODAL DE PERMISOS -->
+  <!-- MODAL 1: PERMISOS (Bienvenida) -->
   <div id="modal-permisos" class="modal-overlay">
     <div class="modal-content">
       <div style="font-size: 55px; margin-bottom: 15px;">📍🔔</div>
@@ -106,6 +112,33 @@
       <button class="btn-primary" onclick="concederPermisosVecino()">¡Habilitar Todo!</button>
     </div>
   </div>
+
+  <!-- MODAL 2: CONFIRMAR ALERTA GARITA -->
+  <div id="modal-confirmacion" class="modal-overlay">
+    <div class="modal-content">
+      <div style="font-size: 55px; margin-bottom: 10px;">⚠️</div>
+      <h3>¿Enviar Alerta Global?</h3>
+      <p id="texto-motivo-alerta" style="font-size: 18px; font-weight: bold; color: var(--danger); margin-bottom: 10px;"></p>
+      <p>Esto hará sonar los celulares de todos los vecinos.</p>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-outline" onclick="cerrarModalConfirmacion()" style="margin:0;">Cancelar</button>
+        <button class="btn-danger" id="btn-ejecutar-alerta" style="margin:0;">Sí, Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ALERTA RECIBIDA (Para el vecino) -->
+  <div id="modal-alerta" class="modal-overlay">
+    <div class="modal-content">
+      <div style="font-size: 55px; margin-bottom: 10px;">🚨</div>
+      <h3 style="color: var(--danger);">ALERTA DE GARITA</h3>
+      <p id="texto-alerta-recibida" style="font-size: 20px; font-weight: bold; color: var(--dark);"></p>
+      <button class="btn-primary" onclick="cerrarModalAlerta()">Entendido</button>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIÓN FLOTANTE -->
+  <div id="toast-exito" class="toast-notificacion">✅ Alerta enviada con éxito</div>
 
   <!-- PANTALLA 1: INGRESO -->
   <div class="container vista" id="vista-login">
@@ -157,12 +190,12 @@
     <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0;">
     <h3 style="text-align:left; color:var(--gray); font-size: 14px;">EMITIR ALERTA A VECINOS</h3>
     <div class="grid-botones">
-      <button onclick="enviarAlertaGarita('Sospechoso merodeando')"><span>🕵️‍♂️</span>Sospechoso</button>
-      <button onclick="enviarAlertaGarita('Vehículo desconocido')"><span>🚘</span>Vehículo Raro</button>
-      <button onclick="enviarAlertaGarita('Ruidos molestos detectados')"><span>🔊</span>Ruidos</button>
-      <button onclick="enviarAlertaGarita('Falla de suministro eléctrico/agua')"><span>⚠️</span>Corte Luz/Agua</button>
-      <button onclick="enviarAlertaGarita('Incendio o humo detectado')"><span>🔥</span>Incendio/Humo</button>
-      <button onclick="enviarAlertaGarita('Aviso general de seguridad')"><span>📢</span>Aviso General</button>
+      <button onclick="abrirModalConfirmacion('Sospechoso merodeando')"><span>🕵️‍♂️</span>Sospechoso</button>
+      <button onclick="abrirModalConfirmacion('Vehículo desconocido')"><span>🚘</span>Vehículo Raro</button>
+      <button onclick="abrirModalConfirmacion('Ruidos molestos detectados')"><span>🔊</span>Ruidos</button>
+      <button onclick="abrirModalConfirmacion('Falla de suministro eléctrico/agua')"><span>⚠️</span>Corte Luz/Agua</button>
+      <button onclick="abrirModalConfirmacion('Incendio o humo detectado')"><span>🔥</span>Incendio/Humo</button>
+      <button onclick="abrirModalConfirmacion('Aviso general de seguridad')"><span>📢</span>Aviso General</button>
     </div>
     <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0;">
     <button class="btn-danger" style="height: 70px; font-size: 20px;" onclick="window.location.href='tel:911'">📞 LLAMAR 911</button>
@@ -172,21 +205,20 @@
 
   <script>
     // ====================================================================
-    // 1. PEGA AQUÍ LA CONFIGURACIÓN DE FIREBASE Y CLOUDFLARE
+    // CONFIGURACIÓN DE FIREBASE Y CLOUDFLARE
     // ====================================================================
     const firebaseConfig = {
-  apiKey: "AIzaSyCD5Ji6o5t4HQo_6Hpj33Sz3PzzuH0JF9Y",
-  authDomain: "app-vendedores-inteligente.firebaseapp.com",
-  projectId: "app-vendedores-inteligente",
-  storageBucket: "app-vendedores-inteligente.firebasestorage.app",
-  messagingSenderId: "583313989429",
-  appId: "1:583313989429:web:2d3663e547b609e211367c"
-};
+      apiKey: "AIzaSyCD5Ji6o5t4HQo_6Hpj33Sz3PzzuH0JF9Y",
+      authDomain: "app-vendedores-inteligente.firebaseapp.com",
+      projectId: "app-vendedores-inteligente",
+      storageBucket: "app-vendedores-inteligente.firebasestorage.app",
+      messagingSenderId: "583313989429",
+      appId: "1:583313989429:web:2d3663e547b609e211367c"
+    };
     const VAPID_KEY = "BN480IhH70femCH6611oE699tLXFGYbS4MWcTbcEMbOUkR0vIwxXPrzTjhJEB9JcizJxqu4xs91-bQsal1_Hi8o";
     const API_URL = 'https://appseguridad.santamariapablodaniel.workers.dev/';
-    // ====================================================================
 
-    // Inicializar Tema visual
+    // --- MANEJO DE TEMAS ---
     function cambiarTema(tema) {
       document.documentElement.setAttribute('data-theme', tema);
       localStorage.setItem('temaVecinal', tema);
@@ -199,11 +231,10 @@
       document.querySelectorAll('.theme-selector button').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-tema-' + tema)?.classList.add('active');
     }
-    
     const temaGuardado = localStorage.getItem('temaVecinal') || 'claro';
     cambiarTema(temaGuardado);
 
-    // Inicializar Firebase
+    // --- INICIALIZAR FIREBASE ---
     firebase.initializeApp(firebaseConfig);
     const messaging = firebase.messaging();
 
@@ -214,18 +245,16 @@
     let audioContexto = null;
     let alertasNotificadas = new Set();
     let alarmaReintento = null;
-    let swRegistration = null; // Guardamos el registro del Service Worker aquí
+    let swRegistration = null; 
+    let motivoAlertaActual = ""; // Guarda el motivo temporalmente para el modal
 
-    // Registrar Service Worker de forma segura para GitHub Pages
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => { 
-        // El "./" es vital para que funcione dentro de la carpeta de GitHub Pages
         navigator.serviceWorker.register('./firebase-messaging-sw.js')
           .then(registration => {
             swRegistration = registration;
-            console.log('Service Worker registrado correctamente.');
-          })
-          .catch(err => console.log('Error en Service Worker:', err));
+            console.log('Service Worker registrado.');
+          }).catch(err => console.log('Error en SW:', err));
       });
     }
 
@@ -265,7 +294,6 @@
           mostrar('vista-vecino');
           configurarSOS(); 
           
-          // Lógica del Modal de Permisos para Vecinos
           if (Notification.permission !== "granted") {
             document.getElementById('modal-permisos').style.display = 'flex';
           } else {
@@ -275,50 +303,47 @@
       }
     }
 
-    // Modal de permisos de Bienvenida
+    // --- MODALES Y UI CUSTOM ---
     function concederPermisosVecino() {
-      audioContexto = new (window.AudioContext || window.webkitAudioContext)(); // Prepara el audio
-      
-      // Pedir ubicación
+      audioContexto = new (window.AudioContext || window.webkitAudioContext)();
       if(navigator.geolocation) navigator.geolocation.getCurrentPosition(()=>{}, ()=>{});
       
-      // Pedir notificaciones
       Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          obtenerYGuardarToken();
-        }
+        if (permission === 'granted') obtenerYGuardarToken();
       });
-      
       document.getElementById('modal-permisos').style.display = 'none';
     }
 
-    // Botón manual para la garita
     function habilitarNotificaciones() {
       document.getElementById('btn-habilitar-push').style.display = 'none';
       audioContexto = new (window.AudioContext || window.webkitAudioContext)(); 
-      
       Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          obtenerYGuardarToken();
-        }
+        if (permission === 'granted') obtenerYGuardarToken();
       });
     }
 
-    // Función segura para obtener el Token y mandarlo a Google Sheets
     function obtenerYGuardarToken() {
       if (!swRegistration) {
-        // Si el Service Worker no cargó aún, espera 1 segundo e intenta de nuevo
         setTimeout(obtenerYGuardarToken, 1000);
         return;
       }
-      // Pasamos explicitamente el SW a Firebase para evitar el error 404
       messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swRegistration })
         .then(currentToken => {
           if (currentToken) {
-            console.log("Token obtenido, guardando en DB...");
+            console.log("Token obtenido");
             api('guardarToken', { idUsuario: userActual.id, token: currentToken });
           }
-        }).catch(err => console.error("Error al obtener el token:", err));
+        }).catch(err => console.error("Error token:", err));
+    }
+
+    function mostrarToastExito() {
+      const toast = document.getElementById('toast-exito');
+      toast.classList.add('toast-show');
+      setTimeout(() => toast.classList.remove('toast-show'), 3000);
+    }
+
+    function cerrarModalAlerta() {
+      document.getElementById('modal-alerta').style.display = 'none';
     }
 
     // --- VECINO ---
@@ -390,13 +415,27 @@
     }
 
     // --- GARITA ---
-    async function enviarAlertaGarita(motivo) {
-      if(!confirm(`¿Enviar alerta a todos los vecinos por: ${motivo}?`)) return;
+    function abrirModalConfirmacion(motivo) {
+      motivoAlertaActual = motivo;
+      document.getElementById('texto-motivo-alerta').innerText = `"${motivo}"`;
+      document.getElementById('modal-confirmacion').style.display = 'flex';
+    }
+
+    function cerrarModalConfirmacion() {
+      document.getElementById('modal-confirmacion').style.display = 'none';
+      motivoAlertaActual = "";
+    }
+
+    document.getElementById('btn-ejecutar-alerta').addEventListener('click', async () => {
+      if(!motivoAlertaActual) return;
+      const motivo = motivoAlertaActual;
+      cerrarModalConfirmacion();
+      
       document.getElementById('lista-avisos').innerHTML = '<p>Enviando Alerta a Vecinos...</p>';
       await api('alertaGarita', { motivo: motivo });
-      alert("Alerta enviada correctamente a todos los vecinos.");
+      mostrarToastExito();
       actualizarGarita();
-    }
+    });
 
     function emitirSonidoAlarma(esSOS) {
       if(!audioContexto) return;
@@ -457,11 +496,14 @@
       actualizarGarita(); 
     }
 
+    // Escucha notificaciones cuando la app está abierta en pantalla
     messaging.onMessage((payload) => {
       console.log('Push recibido', payload);
       emitirSonidoAlarma(true);
       if(userActual && userActual.rol.toUpperCase() === 'VECINO') {
-         alert("🚨 ALERTA GARITA: " + payload.notification.body);
+         // Reemplazamos el alert() nativo por el modal custom
+         document.getElementById('texto-alerta-recibida').innerText = payload.notification.body;
+         document.getElementById('modal-alerta').style.display = 'flex';
       }
     });
   </script>
