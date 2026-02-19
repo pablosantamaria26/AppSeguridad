@@ -1,15 +1,20 @@
 {
-  "name": "App Seguridad",
-  "short_name": "Vecinos",
-  "description": "Aviso de llegada y Alerta",
+  "name": "Alerta Vecinal",
+  "short_name": "Seguridad",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f8f9fa",
-  "theme_color": "#0056b3",
+  "background_color": "#f2f2f7",
+  "theme_color": "#007aff",
+  "description": "App de seguridad para el barrio",
   "icons": [
     {
       "src": "icono.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icono.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
