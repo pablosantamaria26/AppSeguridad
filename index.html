@@ -2,550 +2,408 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <meta name="theme-color" content="#f0f2f5" id="theme-color-meta">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+  <meta name="theme-color" content="#f2f2f7" id="theme-color-meta">
   <title>Alerta Vecinal</title>
   
-  <!-- Fundamental para iPhone -->
   <link rel="apple-touch-icon" href="icono.png">
   <link rel="manifest" href="manifest.json">
   
-  <!-- SDK de Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
 
   <style>
-    /* ==========================================
-       VARIABLES DE TEMAS Y DISEÑO
-       ========================================== */
+    /* VARIABLES Y DISEÑO NATIVO PREMIUM */
     :root { 
-      --primary: #007aff; --success: #34c759; --danger: #ff3b30; 
-      --dark: #1c1c1e; --gray: #8e8e93; --bg-color: #f2f2f7; 
-      --card-bg: #ffffff; --warn: #ffcc00; --text-main: #1c1c1e;
-      --input-bg: #fafafa; --border: #e5e5ea;
-      --glass-blur: blur(0px);
-      --bg-gradient: linear-gradient(135deg, #4b5563 0%, #e2e8f0 100%);
+      --primary: #007aff; --primary-dim: rgba(0, 122, 255, 0.15);
+      --success: #34c759; --danger: #ff3b30; --danger-dark: #d70015;
+      --bg-body: #f2f2f7; --bg-card: #ffffff;
+      --text-main: #000000; --text-sec: #8e8e93;
+      --border: rgba(0,0,0,0.08); --shadow: 0 8px 30px rgba(0,0,0,0.08);
+      --radius-md: 16px;
+      --safe-area-top: env(safe-area-inset-top);
+      --safe-area-bottom: env(safe-area-inset-bottom);
+      --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
     }
-
     [data-theme="oscuro"] {
-      --primary: #0a84ff; --success: #32d74b; --danger: #ff453a; 
-      --dark: #ffffff; --gray: #98989d; --bg-color: #000000; 
-      --card-bg: #1c1c1e; --warn: #ffd60a; --text-main: #ffffff;
-      --input-bg: #2c2c2e; --border: #38383a;
-      --glass-blur: blur(0px);
-      --bg-gradient: linear-gradient(135deg, #09090b 0%, #27272a 100%);
+      --primary: #0a84ff; --primary-dim: rgba(10, 132, 255, 0.2);
+      --success: #30d158; --danger: #ff453a; --danger-dark: #ff453a;
+      --bg-body: #000000; --bg-card: #1c1c1e;
+      --text-main: #ffffff; --text-sec: #98989d;
+      --border: rgba(255,255,255,0.1); --shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
-
-    /* TEMA DUO TONO (Premium Glassmorphism) */
     [data-theme="duotono"] {
-      --primary: #38bdf8; --success: #10b981; --danger: #f43f5e; 
-      --dark: #ffffff; --gray: #cbd5e1; --bg-color: transparent; 
-      --card-bg: rgba(15, 23, 42, 0.65); --warn: #fbbf24; --text-main: #f8fafc;
-      --input-bg: rgba(255, 255, 255, 0.1); --border: rgba(255, 255, 255, 0.15);
-      --glass-blur: blur(16px);
-      --bg-gradient: linear-gradient(-45deg, #1e3a8a, #7e22ce, #0f172a, #be185d);
+      --primary: #60a5fa; --primary-dim: rgba(96, 165, 250, 0.2);
+      --success: #34d399; --danger: #f87171; --danger-dark: #ef4444;
+      --bg-body: #111827; --bg-card: rgba(31, 41, 55, 0.7);
+      --text-main: #f3f4f6; --text-sec: #9ca3af;
+      --border: rgba(255,255,255,0.08); --shadow: 0 8px 30px rgba(0,0,0,0.4);
     }
 
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; 
-      background: var(--bg-gradient);
-      background-attachment: fixed;
-      margin: 0; padding: 15px; display: flex; justify-content: center; align-items: flex-start; 
-      min-height: 100vh; color: var(--text-main); 
-      transition: background 0.4s ease, color 0.4s ease;
-    }
-
-    /* Activación del fondo animado solo para el Duo Tono */
-    body.tema-duotono-activo {
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-    }
-
-    .container { 
-      width: 100%; max-width: 420px; 
-      background: var(--card-bg); 
-      padding: 35px 25px; 
-      border-radius: 28px; 
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
-      text-align: center; margin-top: 10px; 
-      transition: all 0.4s ease; 
-      position: relative;
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--border);
-    }
-
-    h2 { margin-top: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--dark); }
-    p { color: var(--gray); font-size: 15px; line-height: 1.5; }
-
-    /* ESTILO ESPECIAL PARA EL PIN - CORREGIDO CENTRADO */
-    .pin-input { 
-      width: 100%; padding: 20px 0; margin: 25px 0; 
-      border: 2px solid var(--border); border-radius: 20px; 
-      font-size: 34px; font-weight: 800; text-align: center; 
-      letter-spacing: 18px; 
-      text-indent: 18px; /* Compensa el desfase del letter-spacing */
-      font-family: monospace;
-      background-color: var(--input-bg); color: var(--text-main); 
-      transition: all 0.3s ease; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .pin-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); }
-
-    button { 
-      width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 22px; 
-      font-size: 19px; font-weight: 700; color: white; cursor: pointer; 
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15); position: relative; overflow: hidden; 
-    }
-    button:active { transform: scale(0.95) translateY(2px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; padding: 0; font-family: var(--font-stack); background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; background-image: radial-gradient(circle at top left, var(--primary-dim), transparent 40%), radial-gradient(circle at bottom right, rgba(255, 59, 48, 0.05), transparent 40%); }
     
-    .btn-primary { background: var(--primary); box-shadow: 0 6px 20px rgba(0, 122, 255, 0.25); }
+    .container { width: 100%; height: 100%; max-width: 480px; background: var(--bg-card); position: relative; overflow-y: auto; display: flex; flex-direction: column; padding: calc(20px + var(--safe-area-top)) 24px calc(20px + var(--safe-area-bottom)); }
+    @media (min-width: 500px) { .container { height: auto; max-height: 90vh; border-radius: 40px; box-shadow: var(--shadow); border: 1px solid var(--border); } }
+
+    h2 { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+    p { font-size: 16px; color: var(--text-sec); margin: 0; line-height: 1.5; }
+
+    .pin-input { background: transparent; border: none; border-bottom: 2px solid var(--border); font-size: 48px; font-weight: 700; letter-spacing: 12px; text-align: center; width: 80%; margin: 40px auto; color: var(--text-main); display: block; border-radius: 0; font-family: monospace; }
+    .pin-input:focus { outline: none; border-bottom-color: var(--primary); }
+
+    button { border: none; border-radius: var(--radius-md); font-size: 17px; font-weight: 600; padding: 16px; cursor: pointer; transition: transform 0.1s, opacity 0.2s; width: 100%; position: relative; overflow: hidden; }
+    button:active { transform: scale(0.97); opacity: 0.9; }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px var(--primary-dim); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--primary); margin-top: 10px; }
+    .btn-logout { background: transparent; color: var(--text-sec); font-size: 14px; margin-top: auto; padding: 20px 0; }
+    .btn-success { background: var(--success); color: white; font-size: 18px; height: 60px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3); }
+
+    /* BOTON SOS REDISEÑADO */
+    .sos-wrapper { display: flex; justify-content: center; align-items: center; margin: 30px 0; position: relative; }
+    .sos-container { width: 220px; height: 220px; position: relative; border-radius: 50%; background: var(--bg-card); box-shadow: 0 10px 30px rgba(255, 59, 48, 0.15), inset 0 0 0 2px var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+    #btn-sos { width: 100%; height: 100%; border-radius: 50%; background: transparent; color: var(--danger); font-size: 28px; font-weight: 800; z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0; }
+    #sos-progress { position: absolute; bottom: 0; left: 0; width: 0%; height: 100%; background: linear-gradient(90deg, var(--danger) 0%, #ff6b6b 100%); z-index: 1; opacity: 0.9; pointer-events: none; }
+    .sos-hint { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; opacity: 0.7; }
+    .sos-bloqueado { background: #333 !important; color: #777 !important; pointer-events: none; }
     
-    /* Botones Vecino (Súper estéticos) */
-    .btn-success { background: linear-gradient(135deg, var(--success), #28a745); height: 110px; font-size: 24px; box-shadow: 0 10px 25px rgba(52, 199, 89, 0.35); }
-    .btn-danger { background: linear-gradient(135deg, var(--danger), #d32f2f); height: 100px; font-size: 22px; box-shadow: 0 10px 25px rgba(255, 59, 48, 0.35); }
-    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--border); padding: 14px; font-size: 15px; box-shadow: none; border-radius: 16px;}
+    @keyframes heartbeat { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); transform: scale(1); } 70% { box-shadow: 0 0 0 20px rgba(255, 59, 48, 0); transform: scale(1.02); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); transform: scale(1); } }
+    .sos-container::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; animation: heartbeat 2s infinite; z-index: 0; border: 4px solid var(--danger); opacity: 0.1; }
+
+    .vista { display: none; height: 100%; flex-direction: column; }
+    .vista-activa { display: flex; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .historial-item, .tarjeta { background: var(--bg-body); padding: 16px; margin-bottom: 12px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 500; }
+    .tarjeta { flex-direction: column; align-items: flex-start; border-left: 5px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: var(--bg-card); }
+    .tarjeta.sos { border-left-color: var(--danger); background: rgba(255, 59, 48, 0.05); }
+
+    .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .grid-botones button { background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border); height: auto; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; border-radius: 20px; }
+    .grid-botones button span { font-size: 28px; }
+
+    .modal-overlay { background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; position: fixed; top:0; left:0; right:0; bottom:0; display: none; align-items: center; justify-content: center; }
+    .modal-content { background: var(--bg-card); width: 90%; max-width: 360px; border-radius: 32px; padding: 30px; border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; }
+    .custom-textarea { width: 100%; background: var(--bg-body); border: 1px solid var(--border); padding: 15px; border-radius: 12px; font-family: inherit; color: var(--text-main); margin: 15px 0; box-sizing: border-box; resize: none; text-align: left;}
+
+    .toast-notificacion { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(50, 50, 50, 0.9); backdrop-filter: blur(10px); color: white; padding: 12px 24px; border-radius: 50px; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 2000; transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .toast-show { top: 40px; }
     
-    .btn-logout { background: transparent; color: var(--gray); box-shadow: none; font-size: 14px; padding: 10px; margin-top: 20px; text-decoration: underline; border-radius: 10px;}
+    .estado-respuesta-sos { background: #ffe5e5; color: #d70015; border: 2px solid #d70015; padding: 15px; border-radius: 16px; margin-bottom: 15px; animation: heartbeat 2s infinite; }
+    [data-theme="oscuro"] .estado-respuesta-sos { background: #3a0000; color: #ff6b6b; border-color: #ff453a; }
 
-    .vista { display: none; animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-    #vista-login { display: block; } 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .theme-selector { background: var(--bg-body); padding: 4px; border-radius: 14px; display: flex; margin: 20px 0; }
+    .theme-selector button { background: transparent; color: var(--text-sec); padding: 8px; border-radius: 10px; font-size: 12px; box-shadow: none; }
+    .theme-selector button.active { background: var(--bg-card); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .login-icon { font-size: 60px; margin-bottom: 20px; background: var(--bg-body); width: 120px; height: 120px; border-radius: 40px; display: inline-flex; align-items: center; justify-content: center; }
 
-    .historial-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; color: var(--dark);}
-    .historial-item:last-child { border-bottom: none; }
-    
-    .tarjeta { border: none; border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: left; background: var(--input-bg); box-shadow: 0 8px 25px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
-    .tarjeta::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: var(--primary); }
-    .tarjeta.sos::before { background: var(--danger); }
-    .tarjeta.sos { background: rgba(255, 59, 48, 0.08); animation: pulseAlert 2s infinite; }
-    @keyframes pulseAlert { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
-
-    .acciones-garita { display: flex; gap: 10px; flex-direction: column; margin-top: 20px; }
-    .acciones-garita button { margin: 0; height: 70px; font-size: 20px; border-radius: 18px;}
-    
-    #loader { display: none; font-weight: bold; color: var(--primary); margin: 20px 0; font-size: 18px; }
-    .sos-container { position: relative; width: 100%; border-radius: 22px; margin-top: 20px; overflow: hidden; }
-    #sos-progress { position: absolute; bottom: 0; left: 0; height: 100%; background: rgba(0,0,0,0.3); width: 0%; pointer-events: none; transition: width 0.1s linear;}
-
-    /* PROTECCIÓN DEL DISEÑO DE GARITA (Mantiene su estilo sólido y rápido) */
-    #vista-garita.container { backdrop-filter: none; background: var(--card-bg); border: none; }
-    .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-    .grid-botones button { padding: 15px 10px; height: 95px; font-size: 14px; margin: 0; background: var(--input-bg); color: var(--dark); border: 2px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 18px;}
-    .grid-botones button span { font-size: 26px; display: block; margin-bottom: 5px; }
-    .grid-botones button:active { background: var(--border); border-color: var(--primary); }
-
-    /* Selector de Temas */
-    .theme-selector { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; }
-    .theme-selector button { padding: 12px; font-size: 13px; height: auto; margin: 0; border-radius: 14px; background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border); box-shadow: none; font-weight: 600;}
-    .theme-selector button:active { background: var(--border); }
-    .theme-selector button.active { border-color: var(--primary); background: rgba(0, 122, 255, 0.1); color: var(--primary); }
-
-    /* Modales de UI/UX */
-    .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: fadeInModal 0.3s ease; }
-    .modal-content { background: var(--card-bg); padding: 35px 30px; border-radius: 28px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid var(--border); }
-    .modal-content h3 { margin-top: 0; color: var(--dark); font-size: 24px; margin-bottom: 12px; }
-    .modal-content p { color: var(--gray); margin-bottom: 25px; font-size: 16px; line-height: 1.5; }
-    @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
-    /* Notificación Flotante (Toast) */
-    .toast-notificacion { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 16px 28px; border-radius: 20px; font-weight: bold; font-size: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 2000; transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-    .toast-show { top: 25px; }
+    /* SPINNER PREMIUM MEJORADO */
+    .modern-spinner {
+      width: 50px; height: 50px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-
-  <!-- MODAL 1: PERMISOS (Bienvenida) -->
-  <div id="modal-permisos" class="modal-overlay">
-    <div class="modal-content">
-      <div style="font-size: 55px; margin-bottom: 15px;">📍🔔</div>
-      <h3>Permisos Necesarios</h3>
-      <p>Para que la garita sepa que estás cerca y puedas recibir alertas, necesitamos tu permiso de ubicación y notificaciones.</p>
-      <button class="btn-primary" onclick="concederPermisosVecino()">¡Habilitar Todo!</button>
+  <!-- MODALES DE FLUJO Y PERMISOS -->
+  <div id="modal-permisos" class="modal-overlay"><div class="modal-content"><div style="font-size: 50px; margin-bottom: 15px;">📍🔔</div><h3>Permisos Necesarios</h3><p>Habilita la ubicación y notificaciones para protegerte mejor.</p><button class="btn-primary" onclick="concederPermisosVecino()" style="margin-top: 20px;">Habilitar Todo</button></div></div>
+  
+  <div id="modal-confirmacion" class="modal-overlay"><div class="modal-content"><div style="font-size: 50px; margin-bottom: 10px;">⚠️</div><h3>¿Enviar Alerta?</h3><p id="texto-motivo-alerta" style="font-weight: 700; color: var(--danger); margin: 10px 0;"></p><p>Se notificará a todos los vecinos.</p><div style="display: flex; gap: 10px; margin-top: 20px;"><button class="btn-outline" onclick="cerrarModalConfirmacion()" style="margin:0; border:none; background: var(--bg-body); color: var(--text-main);">Cancelar</button><button class="btn-primary" id="btn-ejecutar-alerta" style="margin:0; background: var(--danger);">Sí, Enviar</button></div></div></div>
+  
+  <div id="modal-aviso-custom" class="modal-overlay"><div class="modal-content"><h3>Mensaje a Vecinos</h3><textarea id="input-aviso-custom" class="custom-textarea" rows="3" placeholder="Escriba el aviso que recibirán todos los vecinos..."></textarea><div style="display: flex; gap: 10px;"><button class="btn-outline" onclick="cerrarModalAvisoCustom()" style="margin:0;">Cancelar</button><button class="btn-primary" onclick="confirmarAvisoCustom()" style="margin:0;">Enviar Aviso</button></div></div></div>
+  
+  <div id="modal-alerta" class="modal-overlay"><div class="modal-content" style="border-color: var(--danger);"><div style="font-size: 60px; margin-bottom: 15px; animation: heartbeat 1s infinite;">🚨</div><h3 style="color: var(--danger);">ALERTA VECINAL</h3><p id="texto-alerta-recibida" style="font-size: 18px; font-weight: 700; color: var(--text-main);"></p><button class="btn-primary" onclick="cerrarModalAlerta()" style="margin-top: 20px; background: var(--danger);">Entendido</button></div></div>
+  
+  <div id="toast-exito" class="toast-notificacion">✅ Operación exitosa</div>
+  
+  <!-- SPINNER REDISEÑADO -->
+  <div id="loader" class="modal-overlay" style="z-index: 10000; display: none;">
+    <div style="background: var(--bg-card); padding: 30px 40px; border-radius: 24px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+       <div class="modern-spinner"></div>
+       <p style="margin-top: 15px; font-weight: 600; color: var(--text-main); font-size: 15px;">Conectando...</p>
     </div>
   </div>
 
-  <!-- MODAL 2: CONFIRMAR ALERTA GARITA -->
-  <div id="modal-confirmacion" class="modal-overlay">
-    <div class="modal-content">
-      <div style="font-size: 55px; margin-bottom: 10px;">⚠️</div>
-      <h3>¿Enviar Alerta Global?</h3>
-      <p id="texto-motivo-alerta" style="font-size: 18px; font-weight: bold; color: var(--danger); margin-bottom: 10px;"></p>
-      <p>Esto hará sonar los celulares de todos los vecinos.</p>
-      <div style="display: flex; gap: 10px;">
-        <button class="btn-outline" onclick="cerrarModalConfirmacion()" style="margin:0;">Cancelar</button>
-        <button class="btn-danger" id="btn-ejecutar-alerta" style="margin:0;">Sí, Enviar</button>
+  <div class="container">
+    <!-- VISTA LOGIN -->
+    <div class="vista" id="vista-login">
+      <div><div class="login-icon">🛡️</div><h2>Bienvenido</h2><p>Introduce tu PIN de seguridad</p><input type="password" id="inputId" class="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" oninput="chequearPin(this)"><div id="login-error" style="color: var(--danger); margin-top: 20px; font-weight: 600; min-height: 20px;"></div></div>
+    </div>
+
+    <!-- VISTA VECINO -->
+    <div class="vista" id="vista-vecino">
+      <header style="margin-bottom: 20px; text-align: left;"><h2 id="vecino-nombre" style="color: var(--primary);">Vecino</h2><p id="vecino-domicilio" style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 14px;">📍</span> Cargando dirección...</p></header>
+      <button class="btn-success" onclick="registrarLlegada()"><span>🚗</span> ESTOY LLEGANDO</button>
+      <div id="mensaje-estado" style="text-align: center; margin: 15px 0; font-weight: 600; min-height: 24px;"></div>
+      
+      <div class="sos-wrapper">
+        <div class="sos-container">
+          <div id="sos-progress"></div>
+          <button id="btn-sos">🚨<span style="display: block; margin-top: 5px;">SOS</span><span class="sos-hint" id="sos-instruccion">MANTENER</span></button>
+        </div>
       </div>
+
+      <div style="flex: 1; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><h3 style="margin:0; font-size: 16px; color: var(--text-sec);">Actividad Reciente</h3><span style="font-size: 12px; color: var(--text-sec);">Autorefresh activo</span></div>
+        <div id="lista-historial"></div>
+      </div>
+      <div class="theme-selector"><button id="btn-tema-claro" onclick="cambiarTema('claro')" style="flex:1;">☀️ Claro</button><button id="btn-tema-oscuro" onclick="cambiarTema('oscuro')" style="flex:1;">🌙 Oscuro</button><button id="btn-tema-duotono" onclick="cambiarTema('duotono')" style="flex:1;">✨ Color</button></div>
+      <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+    </div>
+
+    <!-- VISTA GARITA -->
+    <div class="vista" id="vista-garita">
+      <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h2>CENTRAL GARITA</h2><button class="btn-logout" onclick="cerrarSesion()" style="width: auto; padding: 5px 10px; margin: 0; border-radius: 8px;">Salir</button></header>
+      <button id="btn-habilitar-push" class="btn-primary" onclick="habilitarNotificaciones()" style="background: var(--text-main); color: var(--bg-body); margin-bottom: 20px;">🔔 ACTIVAR SONIDO</button>
+      <div id="lista-avisos" style="flex: 1; overflow-y: auto; padding-bottom: 20px; min-height: 150px;"></div>
+      <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0 20px 0;">
+      <h3 style="font-size: 14px; color: var(--text-sec); margin-bottom: 10px; text-align: left;">GENERAR ALERTA GLOBAL</h3>
+      <div class="grid-botones">
+        <button onclick="abrirModalConfirmacion('Sospechoso merodeando')"><span>🕵️‍♂️</span>Sospechoso</button>
+        <button onclick="abrirModalConfirmacion('Vehículo desconocido')"><span>🚘</span>Vehículo</button>
+        <button onclick="abrirModalConfirmacion('Ruidos molestos detectados')"><span>🔊</span>Ruidos</button>
+        <button onclick="abrirModalConfirmacion('Falla de suministro eléctrico/agua')"><span>⚠️</span>Servicios</button>
+        <button onclick="abrirModalConfirmacion('Incendio o humo detectado')"><span>🔥</span>Incendio</button>
+        <button onclick="abrirModalAvisoCustom()" style="background: var(--primary-dim); color: var(--primary); border-color: transparent;"><span>📢</span>Mensaje Libre</button>
+      </div>
+      <button class="btn-primary" style="background: var(--danger); height: 60px; font-size: 20px; margin-top: 10px;" onclick="window.location.href='tel:911'">📞 LLAMAR 911</button>
     </div>
   </div>
-
-  <!-- MODAL 3: ALERTA RECIBIDA (Para el vecino) -->
-  <div id="modal-alerta" class="modal-overlay">
-    <div class="modal-content">
-      <div style="font-size: 55px; margin-bottom: 10px; animation: pulseAlert 1.5s infinite;">🚨</div>
-      <h3 style="color: var(--danger);">ALERTA DE GARITA</h3>
-      <p id="texto-alerta-recibida" style="font-size: 20px; font-weight: bold; color: var(--dark);"></p>
-      <button class="btn-primary" onclick="cerrarModalAlerta()">Entendido</button>
-    </div>
-  </div>
-
-  <!-- TOAST NOTIFICACIÓN FLOTANTE -->
-  <div id="toast-exito" class="toast-notificacion" id="mensaje-toast">✅ Alerta enviada con éxito</div>
-
-  <!-- PANTALLA 1: INGRESO -->
-  <div class="container vista" id="vista-login">
-    <div style="font-size: 45px; margin-bottom: 10px;">🛡️</div>
-    <h2>Seguridad Vecinal</h2>
-    <p>Ingresá tu PIN de seguridad (4 dígitos)</p>
-    
-    <!-- Input Auto-Ejecutable -->
-    <input type="password" id="inputId" class="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" oninput="chequearPin(this)">
-    
-    <div id="login-error" style="color: var(--danger); margin-top: 10px; font-weight: bold;"></div>
-  </div>
-
-  <!-- PANTALLA 2: VECINO -->
-  <div class="container vista" id="vista-vecino">
-    <h2 id="vecino-nombre" style="font-size: 28px; margin-bottom: 5px; color: var(--primary);">Vecino</h2>
-    <p id="vecino-domicilio" style="margin-bottom: 25px; font-weight: 600; color: var(--dark);"></p>
-    
-    <button class="btn-success" onclick="registrarLlegada()">🚗 ESTOY LLEGANDO</button>
-    <div id="mensaje-estado" style="min-height: 24px; margin: 15px 0; font-weight: bold; font-size: 18px;"></div>
-    
-    <div class="sos-container">
-      <button class="btn-danger" id="btn-sos">🚨 EMERGENCIA<br><small style="font-size: 14px; font-weight: 600; opacity: 0.9;">(Mantener presionado)</small></button>
-      <div id="sos-progress"></div>
-    </div>
-
-    <hr style="border: 0; border-top: 2px dashed var(--border); margin: 35px 0 25px 0;">
-    
-    <h3 style="text-align: left; font-size: 18px; margin-bottom: 15px;">Mis últimos avisos</h3>
-    <button class="btn-outline" onclick="cargarHistorial()">↻ Actualizar historial</button>
-    <div id="lista-historial" style="text-align: left; margin-top: 15px;"></div>
-
-    <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0 15px 0;">
-    <p style="text-align: left; margin: 0 0 10px 0; font-size: 14px; font-weight: bold;">🎨 Apariencia</p>
-    <div class="theme-selector">
-      <button id="btn-tema-claro" onclick="cambiarTema('claro')">☀️ Claro</button>
-      <button id="btn-tema-oscuro" onclick="cambiarTema('oscuro')">🌙 Oscuro</button>
-      <button id="btn-tema-duotono" onclick="cambiarTema('duotono')">✨ Duo Tono</button>
-    </div>
-    
-    <!-- BOTÓN CERRAR SESIÓN -->
-    <button class="btn-logout" onclick="cerrarSesion()">Cambiar usuario (Cerrar sesión)</button>
-  </div>
-
-  <!-- PANTALLA 3: GARITA -->
-  <div class="container vista" id="vista-garita">
-    <h2>CENTRAL GARITA</h2>
-    <button id="btn-habilitar-push" class="btn-primary" onclick="habilitarNotificaciones()" style="background:var(--warn); color:#000; box-shadow:none;">🔔 Activar Alertas</button>
-    
-    <div id="lista-avisos" style="margin-top: 25px;">
-      <div style="padding:40px 0; color:var(--gray); font-weight:bold; font-size:18px;">Iniciando sistema...</div>
-    </div>
-    
-    <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0;">
-    <h3 style="text-align:left; color:var(--gray); font-size: 14px;">EMITIR ALERTA A VECINOS</h3>
-    <div class="grid-botones">
-      <button onclick="abrirModalConfirmacion('Sospechoso merodeando')"><span>🕵️‍♂️</span>Sospechoso</button>
-      <button onclick="abrirModalConfirmacion('Vehículo desconocido')"><span>🚘</span>Vehículo Raro</button>
-      <button onclick="abrirModalConfirmacion('Ruidos molestos detectados')"><span>🔊</span>Ruidos</button>
-      <button onclick="abrirModalConfirmacion('Falla de suministro eléctrico/agua')"><span>⚠️</span>Corte Luz/Agua</button>
-      <button onclick="abrirModalConfirmacion('Incendio o humo detectado')"><span>🔥</span>Incendio/Humo</button>
-      <button onclick="abrirModalConfirmacion('Aviso general de seguridad')"><span>📢</span>Aviso General</button>
-    </div>
-    <hr style="border: 0; border-top: 2px solid var(--border); margin: 30px 0;">
-    <button class="btn-danger" style="height: 70px; font-size: 20px;" onclick="window.location.href='tel:911'">📞 LLAMAR 911</button>
-    
-    <!-- BOTÓN CERRAR SESIÓN -->
-    <button class="btn-logout" onclick="cerrarSesion()">Cambiar turno (Cerrar sesión)</button>
-  </div>
-
-  <div id="loader">Conectando de forma segura... ⏳</div>
 
   <script>
-    // ====================================================================
-    // CONFIGURACIÓN DE FIREBASE Y CLOUDFLARE
-    // ====================================================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyCD5Ji6o5t4HQo_6Hpj33Sz3PzzuH0JF9Y",
-      authDomain: "app-vendedores-inteligente.firebaseapp.com",
-      projectId: "app-vendedores-inteligente",
-      storageBucket: "app-vendedores-inteligente.firebasestorage.app",
-      messagingSenderId: "583313989429",
-      appId: "1:583313989429:web:2d3663e547b609e211367c"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyCD5Ji6o5t4HQo_6Hpj33Sz3PzzuH0JF9Y", authDomain: "app-vendedores-inteligente.firebaseapp.com", projectId: "app-vendedores-inteligente", storageBucket: "app-vendedores-inteligente.firebasestorage.app", messagingSenderId: "583313989429", appId: "1:583313989429:web:2d3663e547b609e211367c" };
     const VAPID_KEY = "BN480IhH70femCH6611oE699tLXFGYbS4MWcTbcEMbOUkR0vIwxXPrzTjhJEB9JcizJxqu4xs91-bQsal1_Hi8o";
     const API_URL = 'https://appseguridad.santamariapablodaniel.workers.dev/';
 
-    // --- MANEJO DE TEMAS ---
     function cambiarTema(tema) {
       document.documentElement.setAttribute('data-theme', tema);
       localStorage.setItem('temaVecinal', tema);
-      
-      const metaColor = document.getElementById('theme-color-meta');
-      if(tema === 'oscuro') {
-        metaColor.setAttribute('content', '#000000');
-        document.body.classList.remove('tema-duotono-activo');
-      }
-      else if(tema === 'duotono') {
-        metaColor.setAttribute('content', '#1e3a8a');
-        document.body.classList.add('tema-duotono-activo');
-      }
-      else {
-        metaColor.setAttribute('content', '#f2f2f7');
-        document.body.classList.remove('tema-duotono-activo');
-      }
-
+      document.getElementById('theme-color-meta').setAttribute('content', tema === 'oscuro' ? '#000000' : (tema === 'duotono' ? '#111827' : '#f2f2f7'));
       document.querySelectorAll('.theme-selector button').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-tema-' + tema)?.classList.add('active');
     }
-    const temaGuardado = localStorage.getItem('temaVecinal') || 'claro';
-    cambiarTema(temaGuardado);
+    cambiarTema(localStorage.getItem('temaVecinal') || 'claro');
 
-    // --- INICIALIZAR FIREBASE ---
     firebase.initializeApp(firebaseConfig);
     const messaging = firebase.messaging();
 
-    let userActual = null;
-    let intEstado = null; 
-    let intGarita = null; 
-    let idPendiente = null;
-    let audioContexto = null;
-    let alertasNotificadas = new Set();
-    let alarmaReintento = null;
-    let swRegistration = null; 
-    let motivoAlertaActual = ""; 
+    let userActual = null, intEstado = null, intGarita = null, intHistorial = null, idPendiente = null, audioContexto = null;
+    let alertasNotificadas = new Set(), alarmaReintento = null, swRegistration = null, motivoAlertaActual = "", tipoAlertaActual = null; 
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => { 
-        navigator.serviceWorker.register('./firebase-messaging-sw.js')
-          .then(registration => {
-            swRegistration = registration;
-            console.log('Service Worker registrado.');
-          }).catch(err => console.log('Error en SW:', err));
-          
-        // 🚀 AUTO-LOGIN AL CARGAR LA APP
+        navigator.serviceWorker.register('./firebase-messaging-sw.js').then(r => swRegistration = r);
         const idGuardado = localStorage.getItem('idVecinal');
-        if (idGuardado) {
-           iniciarSesion(idGuardado);
-        }
+        if (idGuardado) iniciarSesion(idGuardado); else mostrar('vista-login');
       });
-    }
+    } else mostrar('vista-login');
 
     async function api(accion, payload = {}) {
-      try {
-        const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, payload }) });
-        return await res.json();
-      } catch (e) { return { error: 'Error de red.' }; }
+      try { return await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, payload }) })).json(); } 
+      catch (e) { return { error: 'Error de red.' }; }
     }
 
     function mostrar(id) {
-      document.querySelectorAll('.vista').forEach(v => v.style.display = 'none');
+      document.querySelectorAll('.vista').forEach(v => { v.style.display = 'none'; v.classList.remove('vista-activa'); });
       document.getElementById('loader').style.display = 'none';
-      if(id) document.getElementById(id).style.display = 'block';
+      if(id) { const el = document.getElementById(id); el.style.display = 'flex'; setTimeout(() => el.classList.add('vista-activa'), 10); }
     }
 
-    // NUEVO: CHEQUEO AUTOMÁTICO DE PIN
-    function chequearPin(input) {
-      if (input.value.length === 4) {
-         input.blur(); // Esconde el teclado
-         iniciarSesion();
-      }
-    }
+    function chequearPin(input) { if (input.value.length === 4) { input.blur(); iniciarSesion(); } }
 
-    // Adaptado para recibir un ID guardado o leer el del input
     async function iniciarSesion(autoId = null) {
       const inputEl = document.getElementById('inputId');
       const id = autoId || inputEl.value;
       if(!id) return;
       
-      mostrar(''); document.getElementById('loader').style.display = 'block';
+      document.getElementById('loader').style.display = 'flex'; // SPINNER NUEVO
       const res = await api('login', { id });
       document.getElementById('loader').style.display = 'none';
       
       if(res.error) {
-        if(autoId) localStorage.removeItem('idVecinal'); // Si falló el auto-login, lo borramos
-        document.getElementById('login-error').innerText = res.error;
-        inputEl.value = ''; // Borramos el input para que vuelva a tipear
-        mostrar('vista-login');
+        if(autoId) localStorage.removeItem('idVecinal');
+        document.getElementById('login-error').innerText = res.error; inputEl.value = ''; mostrar('vista-login');
       } else {
-        userActual = res;
-        localStorage.setItem('idVecinal', id); // 💾 GUARDAR EN MEMORIA
-        
+        userActual = res; localStorage.setItem('idVecinal', id);
         if(res.rol.toUpperCase() === 'GUARDIA') {
-          mostrar('vista-garita');
-          document.getElementById('btn-habilitar-push').style.display = 'block';
-          loopGarita(); 
+          mostrar('vista-garita'); document.getElementById('btn-habilitar-push').style.display = 'block'; loopGarita(); 
         } else {
-          document.getElementById('vecino-nombre').innerText = res.nombre;
-          document.getElementById('vecino-domicilio').innerText = "📍 " + res.domicilio;
-          mostrar('vista-vecino');
-          configurarSOS(); 
-          
-          if (Notification.permission !== "granted") {
-            document.getElementById('modal-permisos').style.display = 'flex';
-          } else {
-            obtenerYGuardarToken();
-          }
+          document.getElementById('vecino-nombre').innerText = "Hola, " + res.nombre;
+          document.getElementById('vecino-domicilio').innerHTML = "📍 " + res.domicilio;
+          mostrar('vista-vecino'); configurarSOS(); cargarHistorial();
+          if(intHistorial) clearInterval(intHistorial); intHistorial = setInterval(cargarHistorial, 10000);
+          if (Notification.permission !== "granted") document.getElementById('modal-permisos').style.display = 'flex'; else obtenerYGuardarToken();
         }
       }
     }
 
-    // 🚀 FUNCIÓN PARA CERRAR SESIÓN
-    function cerrarSesion() {
-      localStorage.removeItem('idVecinal'); 
-      location.reload(); 
+    function cerrarSesion() { 
+      localStorage.removeItem('idVecinal'); if(intHistorial) clearInterval(intHistorial); if(intEstado) clearInterval(intEstado); if(intGarita) clearInterval(intGarita); location.reload(); 
     }
 
-    // --- MODALES Y UI CUSTOM ---
     function concederPermisosVecino() {
       audioContexto = new (window.AudioContext || window.webkitAudioContext)();
       if(navigator.geolocation) navigator.geolocation.getCurrentPosition(()=>{}, ()=>{});
-      
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') obtenerYGuardarToken();
-      });
+      Notification.requestPermission().then(permission => { if (permission === 'granted') obtenerYGuardarToken(); });
       document.getElementById('modal-permisos').style.display = 'none';
     }
 
     function habilitarNotificaciones() {
       document.getElementById('btn-habilitar-push').style.display = 'none';
       audioContexto = new (window.AudioContext || window.webkitAudioContext)(); 
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') obtenerYGuardarToken();
-      });
+      Notification.requestPermission().then(permission => { if (permission === 'granted') obtenerYGuardarToken(); });
     }
 
     function obtenerYGuardarToken() {
-      if (!swRegistration) {
-        setTimeout(obtenerYGuardarToken, 1000);
-        return;
-      }
-      messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swRegistration })
-        .then(currentToken => {
-          if (currentToken) {
-            console.log("Token obtenido");
-            api('guardarToken', { idUsuario: userActual.id, token: currentToken }).then(() => {
-                mostrarToastExito("🔔 Alertas vinculadas a este celular"); 
-            });
-          }
-        }).catch(err => console.error("Error token:", err));
+      if (!swRegistration) { setTimeout(obtenerYGuardarToken, 1000); return; }
+      messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swRegistration }).then(token => { if(token) api('guardarToken', { idUsuario: userActual.id, token }); });
     }
 
-    function mostrarToastExito(mensaje = "✅ Alerta enviada con éxito") {
-      const toast = document.getElementById('toast-exito');
-      toast.innerText = mensaje;
-      toast.classList.add('toast-show');
-      setTimeout(() => toast.classList.remove('toast-show'), 3000);
+    function mostrarToastExito(mensaje) {
+      const toast = document.getElementById('toast-exito'); toast.innerText = mensaje; toast.classList.add('toast-show'); setTimeout(() => toast.classList.remove('toast-show'), 3000);
     }
 
-    function cerrarModalAlerta() {
-      document.getElementById('modal-alerta').style.display = 'none';
-    }
+    function cerrarModalAlerta() { document.getElementById('modal-alerta').style.display = 'none'; }
 
-    // --- VECINO ---
     function registrarLlegada() {
-      document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--gray);">Ubicando GPS...</span>';
+      tipoAlertaActual = 'LLEGADA';
+      document.getElementById('mensaje-estado').className = ''; 
+      document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--text-sec);">Obteniendo GPS...</span>';
       if(navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          pos => procesarAviso('LLEGADA', pos.coords.latitude, pos.coords.longitude),
-          err => procesarAviso('LLEGADA', null, null), { timeout: 5000 }
+            pos => procesarAviso('LLEGADA', pos.coords.latitude, pos.coords.longitude), 
+            () => procesarAviso('LLEGADA', null, null), 
+            { timeout: 5000 }
         );
-      } else { procesarAviso('LLEGADA', null, null); }
+      } else procesarAviso('LLEGADA', null, null);
     }
 
+    // ==========================================
+    // LÓGICA DE PROCESAMIENTO
+    // ==========================================
     async function procesarAviso(tipo, lat, lng) {
+      tipoAlertaActual = tipo; 
       if(navigator.vibrate) navigator.vibrate(50);
-      const res = await api('registrarAviso', { usuario: userActual, tipo, lat, lng });
-      if(res.error) {
-        document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--danger)">⚠️ ${res.error}</span>`;
-      } else {
-        document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--primary)">⏳ ${res.mensaje}</span>`;
-        if (tipo === 'LLEGADA') {
-          idPendiente = res.idAviso;
-          if(intEstado) clearInterval(intEstado);
-          intEstado = setInterval(chequearConfirmacion, 5000); 
-        } else if (tipo === 'SOS') {
-          const link = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : 'Sin GPS.';
-          const txt = `🚨 *EMERGENCIA VECINAL* 🚨\n\nSoy ${userActual.nombre}\nDom: ${userActual.domicilio}\nUbicación: ${link}`;
-          window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`, '_blank');
+      try {
+        const res = await api('registrarAviso', { usuario: userActual, tipo, lat, lng });
+        if(res.error) {
+          document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--danger)">⚠️ ${res.error}</span>`;
+        } else {
+          document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--primary)">⏳ ${res.mensaje}</span>`;
+          if (tipo === 'LLEGADA' || tipo === 'SOS') {
+            idPendiente = res.idAviso;
+            if(intEstado) clearInterval(intEstado);
+            intEstado = setInterval(chequearConfirmacion, 2000); 
+          }
         }
-      }
+        return true;
+      } catch(e) { return false; }
+    }
+
+    // ==========================================
+    // LÓGICA SOS ROBUSTA (AWAIT ANTES DEL LINK)
+    // ==========================================
+    function bloquearBotonSOS() {
+      const btn = document.getElementById('btn-sos'); btn.classList.add('sos-bloqueado'); btn.innerHTML = '🚨 ENVIADO'; document.getElementById('sos-instruccion').innerText = '';
+    }
+
+    function configurarSOS() {
+      const btn = document.getElementById('btn-sos'), barra = document.getElementById('sos-progress');
+      let timer, ancho = 0, iterador;
+      const reset = () => { if(btn.classList.contains('sos-bloqueado')) return; clearTimeout(timer); clearInterval(iterador); ancho = 0; barra.style.width = '0%'; };
+      
+      const press = (e) => {
+        if(btn.classList.contains('sos-bloqueado')) return;
+        reset();
+        if(navigator.vibrate) navigator.vibrate(20);
+        iterador = setInterval(() => { ancho += 5; barra.style.width = ancho + '%'; }, 100);
+        
+        timer = setTimeout(async () => {
+          clearInterval(iterador); 
+          if(navigator.vibrate) navigator.vibrate([500, 200, 500]); 
+          bloquearBotonSOS();
+
+          // 1. Obtener GPS rápidamente
+          let lat = null, lng = null;
+          if (navigator.geolocation) {
+              try {
+                  const pos = await new Promise((resolve, reject) => {
+                      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 4000 });
+                  });
+                  lat = pos.coords.latitude;
+                  lng = pos.coords.longitude;
+              } catch (err) { console.log("GPS Timeout o Denegado"); }
+          }
+
+          // 2. ESPERAR a que la API lo guarde en la BD (Garita notificada)
+          await procesarAviso('SOS', lat, lng);
+
+          // 3. RECIÉN AHORA abrir WhatsApp. Al ser href no se bloquea en iOS/Safari.
+          const link = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : 'Sin GPS.';
+          const txt = `🚨 *EMERGENCIA VECINAL - ROBO EN PROCESO* 🚨\n\nSoy ${userActual.nombre}\nTel: ${userActual.telefono || 'Sin registro'}\nDom: ${userActual.domicilio}\n\n¡ESTOY SUFRIENDO UN ROBO! Por favor, llamen al 911 ahora mismo.\nUbicación: ${link}`;
+          window.location.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`;
+        }, 2000);
+      };
+      
+      btn.addEventListener('touchstart', press, {passive: true}); btn.addEventListener('touchend', reset);
+      btn.addEventListener('mousedown', press); btn.addEventListener('mouseup', reset); btn.addEventListener('mouseleave', reset);
     }
 
     async function chequearConfirmacion() {
       const res = await api('verificarEstado', { idAviso: idPendiente });
+      const elEstado = document.getElementById('mensaje-estado');
       if(res.estado === 'CONFIRMADO') {
-        if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--success)">✅ ¡Garita confirmada! Avanzá.</span>';
+        if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
+        if(tipoAlertaActual === 'SOS') {
+           elEstado.className = 'estado-respuesta-sos'; 
+           elEstado.innerHTML = '<div>👮 <b>¡AYUDA EN CAMINO!</b></div><div style="font-size:14px; margin-top:5px;">La garita ha confirmado la emergencia.</div>';
+        } else {
+           elEstado.className = '';
+           elEstado.innerHTML = '<span style="color:var(--success); font-size:18px;">✅ ¡Visto por Garita!</span><br><span style="font-size:13px; color:var(--text-sec)">Puedes ingresar.</span>';
+        }
         clearInterval(intEstado);
       } else if (res.estado === 'EXPIRADO') {
-        document.getElementById('mensaje-estado').innerHTML = '<span style="color:var(--danger)">❌ Expiró. El guardia no confirmó.</span>';
-        clearInterval(intEstado);
+        elEstado.innerHTML = '<span style="color:var(--text-sec)">⏳ Aviso finalizado sin confirmación.</span>'; clearInterval(intEstado);
       }
     }
 
     async function cargarHistorial() {
       const datos = await api('obtenerHistorial', { idUsuario: userActual.id });
-      let html = datos.length ? datos.map(d => `<div class="historial-item"><span>${d.fecha}</span><span>${d.estado}</span></div>`).join('') : '<p>Sin registros.</p>';
-      document.getElementById('lista-historial').innerHTML = html;
+      document.getElementById('lista-historial').innerHTML = datos.length ? datos.map(d => `<div class="historial-item"><span>${d.fecha}</span><span>${d.estado}</span></div>`).join('') : '<p style="text-align:center; padding:20px; color:var(--text-sec);">Sin registros recientes.</p>';
     }
 
-    function configurarSOS() {
-      const btn = document.getElementById('btn-sos');
-      const barra = document.getElementById('sos-progress');
-      let timer, ancho = 0, iterador;
-
-      const reset = () => { clearTimeout(timer); clearInterval(iterador); ancho = 0; barra.style.width = '0%'; };
-      const press = (e) => {
-        e.preventDefault(); reset();
-        if(navigator.vibrate) navigator.vibrate(20);
-        iterador = setInterval(() => { ancho += 5; barra.style.width = ancho + '%'; }, 100);
-        timer = setTimeout(() => {
-          clearInterval(iterador); 
-          if(navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]); 
-          navigator.geolocation?.getCurrentPosition(p => procesarAviso('SOS', p.coords.latitude, p.coords.longitude), e => procesarAviso('SOS', null, null));
-        }, 2000);
-      };
-      btn.addEventListener('touchstart', press, {passive: false}); btn.addEventListener('touchend', reset);
-      btn.addEventListener('mousedown', press); btn.addEventListener('mouseup', reset); btn.addEventListener('mouseleave', reset);
-    }
-
-    // --- GARITA ---
+    // ==========================================
+    // GARITA Y MENSAJE PERSONALIZADO
+    // ==========================================
     function abrirModalConfirmacion(motivo) {
-      motivoAlertaActual = motivo;
-      document.getElementById('texto-motivo-alerta').innerText = `"${motivo}"`;
-      document.getElementById('modal-confirmacion').style.display = 'flex';
+      motivoAlertaActual = motivo; document.getElementById('texto-motivo-alerta').innerText = `"${motivo}"`; document.getElementById('modal-confirmacion').style.display = 'flex';
     }
-
-    function cerrarModalConfirmacion() {
-      document.getElementById('modal-confirmacion').style.display = 'none';
-      motivoAlertaActual = "";
-    }
+    function cerrarModalConfirmacion() { document.getElementById('modal-confirmacion').style.display = 'none'; motivoAlertaActual = ""; }
+    
+    // Modal para el guardia para escribir MENSAJE LIBRE a los vecinos
+    function abrirModalAvisoCustom() { document.getElementById('input-aviso-custom').value = ""; document.getElementById('modal-aviso-custom').style.display = 'flex'; }
+    function cerrarModalAvisoCustom() { document.getElementById('modal-aviso-custom').style.display = 'none'; }
+    function confirmarAvisoCustom() { const mensaje = document.getElementById('input-aviso-custom').value.trim(); if (!mensaje) return; cerrarModalAvisoCustom(); abrirModalConfirmacion(mensaje); }
 
     document.getElementById('btn-ejecutar-alerta').addEventListener('click', async () => {
       if(!motivoAlertaActual) return;
-      const motivo = motivoAlertaActual;
-      cerrarModalConfirmacion();
+      const motivo = motivoAlertaActual; cerrarModalConfirmacion();
       
-      document.getElementById('lista-avisos').innerHTML = '<p>Enviando Alerta a Vecinos...</p>';
-      await api('alertaGarita', { motivo: motivo });
-      mostrarToastExito("✅ Alerta enviada con éxito");
-      actualizarGarita();
+      document.getElementById('loader').style.display = 'flex'; // Spinner al enviar
+      await api('alertaGarita', { motivo: motivo }); 
+      document.getElementById('loader').style.display = 'none';
+      
+      mostrarToastExito("✅ Alerta enviada a todos"); actualizarGarita();
     });
 
     function emitirSonidoAlarma(esSOS) {
       if(!audioContexto) return;
       if(navigator.vibrate) navigator.vibrate(esSOS ? [500,200,500,200,500] : [300, 200, 300]);
-      const osc = audioContexto.createOscillator();
-      const gain = audioContexto.createGain();
+      const osc = audioContexto.createOscillator(), gain = audioContexto.createGain();
       osc.type = esSOS ? 'sawtooth' : 'sine';
       osc.frequency.setValueAtTime(esSOS ? 880 : 660, audioContexto.currentTime);
       if(esSOS) osc.frequency.exponentialRampToValueAtTime(440, audioContexto.currentTime + 0.5);
@@ -553,17 +411,14 @@
       osc.start(); gain.gain.exponentialRampToValueAtTime(0.00001, audioContexto.currentTime + 1); osc.stop(audioContexto.currentTime + 1);
     }
 
-    function loopGarita() {
-      actualizarGarita();
-      intGarita = setInterval(actualizarGarita, 5000); 
-    }
+    function loopGarita() { actualizarGarita(); intGarita = setInterval(actualizarGarita, 2500); }
 
     async function actualizarGarita() {
-      const avisos = await api('obtenerAvisos');
-      const div = document.getElementById('lista-avisos');
+      const avisos = await api('obtenerAvisos'), div = document.getElementById('lista-avisos');
       
+      // Manejo de apagado de alarma persistente
       if(avisos.error || !avisos.length) {
-        div.innerHTML = '<div style="padding:50px 0; color:var(--gray); font-weight:600; font-size:18px;">✔️ Todo tranquilo.<br><small>Sin alertas pendientes.</small></div>';
+        div.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-sec); opacity:0.6;"><span style="font-size:40px; margin-bottom:10px;">🛡️</span>Sin novedades</div>';
         if(alarmaReintento) { clearInterval(alarmaReintento); alarmaReintento = null; }
         return;
       }
@@ -571,23 +426,13 @@
       let hayEmergencia = false, hayPendientesNuevos = false;
       div.innerHTML = avisos.map(a => {
         if(a.tipo === 'SOS') hayEmergencia = true;
-        if(!alertasNotificadas.has(a.id)) {
-          alertasNotificadas.add(a.id);
-          emitirSonidoAlarma(a.tipo === 'SOS'); 
-        }
+        if(!alertasNotificadas.has(a.id)) { alertasNotificadas.add(a.id); emitirSonidoAlarma(a.tipo === 'SOS'); }
         hayPendientesNuevos = true;
-        let icono = a.tipo === 'SOS' ? '🚨 SOS' : '🚗 LLEGANDO';
-        return `
-        <div class="tarjeta ${a.tipo === 'SOS' ? 'sos' : ''}">
-          <h3 style="margin:0; font-size: 22px; color: ${a.tipo === 'SOS' ? 'var(--danger)' : 'var(--primary)'};">${icono}</h3>
-          <p style="font-size:22px; margin: 12px 0; font-weight: 800; color: var(--dark);">${a.domicilio}</p>
-          <p style="font-size: 16px; margin: 0; color: var(--gray);"><b>${a.nombre}</b><br>Hace ${a.tiempo} min</p>
-          <div class="acciones-garita">
-            <button class="btn-success" onclick="confirmarGarita('${a.id}')">CONFIRMAR VISTA</button>
-          </div>
-        </div>`;
+        return `<div class="tarjeta ${a.tipo === 'SOS' ? 'sos' : ''}">
+          <div style="width:100%"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; font-size: 18px; color: ${a.tipo === 'SOS' ? 'var(--danger)' : 'var(--primary)'};">${a.tipo === 'SOS' ? '🚨 SOS' : '🚗 LLEGANDO'}</h3><span style="font-size:12px; color:var(--text-sec);">Hace ${a.tiempo} min</span></div><p style="font-size:20px; margin: 8px 0; font-weight: 700; color: var(--text-main);">${a.domicilio}</p><p style="font-size: 15px; margin-bottom:10px; color: var(--text-sec);">${a.nombre}</p><button class="btn-success" style="height:45px; font-size:16px;" onclick="confirmarGarita('${a.id}')">CONFIRMAR VISTA</button></div></div>`;
       }).join('');
       
+      // PERSISTENCIA: Suena cada 15 segs si hay un aviso colgado sin confirmar.
       if(hayPendientesNuevos && !alarmaReintento) {
         alarmaReintento = setInterval(() => { emitirSonidoAlarma(hayEmergencia); }, 15000);
       }
@@ -595,14 +440,13 @@
 
     async function confirmarGarita(id) {
       if(navigator.vibrate) navigator.vibrate(50);
-      document.getElementById('lista-avisos').innerHTML = '<p style="font-weight:bold; color:var(--primary);">Registrando...</p>';
+      document.getElementById('loader').style.display = 'flex'; // Spinner al confirmar
       await api('confirmarAviso', { idAviso: id });
-      actualizarGarita(); 
+      document.getElementById('loader').style.display = 'none';
+      actualizarGarita();
     }
 
-    // Escucha notificaciones cuando la app está abierta en pantalla
     messaging.onMessage((payload) => {
-      console.log('Push recibido', payload);
       emitirSonidoAlarma(true);
       if(userActual && userActual.rol.toUpperCase() === 'VECINO') {
          document.getElementById('texto-alerta-recibida').innerText = payload.notification.body;
