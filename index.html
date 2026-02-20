@@ -182,7 +182,10 @@
     <!-- VISTA GARITA -->
     <div class="vista" id="vista-garita">
       <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h2>CENTRAL GARITA</h2><button class="btn-logout" onclick="cerrarSesion()" style="width: auto; padding: 5px 10px; margin: 0; border-radius: 8px;">Salir</button></header>
-      <button id="btn-habilitar-push" class="btn-primary" onclick="habilitarNotificaciones()" style="background: var(--text-main); color: var(--bg-body); margin-bottom: 20px;">🔔 ACTIVAR SONIDO</button>
+      
+      <!-- BOTÓN ADVERTENCIA AUDIO INICIAL: Oculto por defecto si el usuario toca la pantalla -->
+      <button id="btn-habilitar-push" class="btn-danger-garita" onclick="habilitarNotificacionesGuardia()" style="margin-bottom: 20px; animation: pulse-sos 2s infinite; text-transform: uppercase; display: none;">⚠️ Tocar aquí para activar sirena</button>
+      
       <div id="lista-avisos" style="flex: 1; overflow-y: auto; padding-bottom: 20px; min-height: 150px;"></div>
       <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0 20px 0;">
       <h3 style="font-size: 14px; color: var(--text-sec); margin-bottom: 10px; text-align: left;">GENERAR ALERTA GLOBAL</h3>
@@ -217,6 +220,7 @@
 
     let userActual = null, intEstado = null, intGarita = null, intHistorial = null, idPendiente = null, audioContexto = null;
     let alertasNotificadas = new Set(), alarmaReintento = null, swRegistration = null, motivoAlertaActual = "", tipoAlertaActual = null; 
+    let interaccionUsuario = false; // Memoria de interacción para audio
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => { 
@@ -225,6 +229,52 @@
         if (idGuardado) iniciarSesion(idGuardado); else mostrar('vista-login');
       });
     } else mostrar('vista-login');
+
+    // ==========================================
+    // INICIALIZACIÓN INVISIBLE DE AUDIO Y PUSH
+    // ==========================================
+    function chequearEstadoGuardia() {
+       const btn = document.getElementById('btn-habilitar-push');
+       if (!btn || !userActual || userActual.rol.toUpperCase() !== 'GUARDIA') return;
+       
+       if (interaccionUsuario && Notification.permission === 'granted') {
+           btn.style.display = 'none';
+       } else {
+           btn.style.display = 'block';
+           if (!interaccionUsuario) {
+               btn.innerText = "⚠️ Tocar aquí para activar Sirena";
+               btn.className = "btn-danger-garita";
+           } else {
+               btn.innerText = "🔔 Activar Notificaciones";
+               btn.className = "btn-primary";
+           }
+       }
+    }
+
+    function inicializarAudio() {
+       if (interaccionUsuario) return;
+       if (!audioContexto) audioContexto = new (window.AudioContext || window.webkitAudioContext)();
+       if (audioContexto.state === 'suspended') audioContexto.resume();
+       
+       if (audioContexto.state === 'running') {
+           interaccionUsuario = true;
+           chequearEstadoGuardia();
+       }
+    }
+
+    // El simple hecho de tocar la pantalla en cualquier momento desbloquea el sonido
+    document.addEventListener('click', inicializarAudio);
+    document.addEventListener('touchstart', inicializarAudio, {passive: true});
+
+    function habilitarNotificacionesGuardia() {
+       inicializarAudio();
+       if (Notification.permission !== 'granted') {
+           Notification.requestPermission().then(permission => { 
+               if (permission === 'granted') obtenerYGuardarToken();
+               chequearEstadoGuardia();
+           });
+       }
+    }
 
     async function api(accion, payload = {}) {
       try { return await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion, payload }) })).json(); } 
@@ -262,14 +312,20 @@
         document.getElementById('login-error').innerText = res.error; inputEl.value = ''; mostrar('vista-login');
       } else {
         userActual = res; localStorage.setItem('idVecinal', id);
+        
+        // Si las notificaciones ya estaban habilitadas antes, renovamos el token silenciosamente
+        if (Notification.permission === 'granted') obtenerYGuardarToken();
+
         if(res.rol.toUpperCase() === 'GUARDIA') {
-          mostrar('vista-garita'); document.getElementById('btn-habilitar-push').style.display = 'block'; loopGarita(); 
+          mostrar('vista-garita'); 
+          chequearEstadoGuardia();
+          loopGarita(); 
         } else {
           document.getElementById('vecino-nombre').innerText = "Hola, " + res.nombre;
           document.getElementById('vecino-domicilio').innerHTML = "📍 " + res.domicilio;
           mostrar('vista-vecino'); configurarSOS(); cargarHistorial();
           if(intHistorial) clearInterval(intHistorial); intHistorial = setInterval(cargarHistorial, 10000);
-          if (Notification.permission !== "granted") document.getElementById('modal-permisos').style.display = 'flex'; else obtenerYGuardarToken();
+          if (Notification.permission !== "granted") document.getElementById('modal-permisos').style.display = 'flex';
         }
       }
     }
@@ -279,16 +335,10 @@
     }
 
     function concederPermisosVecino() {
-      audioContexto = new (window.AudioContext || window.webkitAudioContext)();
+      inicializarAudio(); // Aseguramos que el click activa el audio
       if(navigator.geolocation) navigator.geolocation.getCurrentPosition(()=>{}, ()=>{});
       Notification.requestPermission().then(permission => { if (permission === 'granted') obtenerYGuardarToken(); });
       document.getElementById('modal-permisos').style.display = 'none';
-    }
-
-    function habilitarNotificaciones() {
-      document.getElementById('btn-habilitar-push').style.display = 'none';
-      audioContexto = new (window.AudioContext || window.webkitAudioContext)(); 
-      Notification.requestPermission().then(permission => { if (permission === 'granted') obtenerYGuardarToken(); });
     }
 
     function obtenerYGuardarToken() {
