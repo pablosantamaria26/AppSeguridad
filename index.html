@@ -16,7 +16,7 @@
     /* VARIABLES Y DISEÑO NATIVO PREMIUM */
     :root { 
       --primary: #007aff; --primary-dim: rgba(0, 122, 255, 0.15);
-      --success: #34c759; --danger: #ff3b30; --danger-dark: #d70015;
+      --success: #34c759; --danger: #dc2626; --danger-dark: #991b1b;
       --bg-body: #f2f2f7; --bg-card: #ffffff;
       --text-main: #000000; --text-sec: #8e8e93;
       --border: rgba(0,0,0,0.08); --shadow: 0 8px 30px rgba(0,0,0,0.08);
@@ -27,14 +27,14 @@
     }
     [data-theme="oscuro"] {
       --primary: #0a84ff; --primary-dim: rgba(10, 132, 255, 0.2);
-      --success: #30d158; --danger: #ff453a; --danger-dark: #ff453a;
+      --success: #30d158; --danger: #ef4444; --danger-dark: #b91c1c;
       --bg-body: #000000; --bg-card: #1c1c1e;
       --text-main: #ffffff; --text-sec: #98989d;
       --border: rgba(255,255,255,0.1); --shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
     [data-theme="duotono"] {
       --primary: #60a5fa; --primary-dim: rgba(96, 165, 250, 0.2);
-      --success: #34d399; --danger: #f87171; --danger-dark: #ef4444;
+      --success: #34d399; --danger: #f43f5e; --danger-dark: #e11d48;
       --bg-body: #111827; --bg-card: rgba(31, 41, 55, 0.7);
       --text-main: #f3f4f6; --text-sec: #9ca3af;
       --border: rgba(255,255,255,0.08); --shadow: 0 8px 30px rgba(0,0,0,0.4);
@@ -59,16 +59,31 @@
     .btn-logout { background: transparent; color: var(--text-sec); font-size: 14px; margin-top: auto; padding: 20px 0; }
     .btn-success { background: var(--success); color: white; font-size: 18px; height: 60px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3); }
 
-    /* BOTON SOS REDISEÑADO */
-    .sos-wrapper { display: flex; justify-content: center; align-items: center; margin: 30px 0; position: relative; }
-    .sos-container { width: 220px; height: 220px; position: relative; border-radius: 50%; background: var(--bg-card); box-shadow: 0 10px 30px rgba(255, 59, 48, 0.15), inset 0 0 0 2px var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; }
-    #btn-sos { width: 100%; height: 100%; border-radius: 50%; background: transparent; color: var(--danger); font-size: 28px; font-weight: 800; z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0; }
-    #sos-progress { position: absolute; bottom: 0; left: 0; width: 0%; height: 100%; background: linear-gradient(90deg, var(--danger) 0%, #ff6b6b 100%); z-index: 1; opacity: 0.9; pointer-events: none; }
-    .sos-hint { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; opacity: 0.7; }
-    .sos-bloqueado { background: #333 !important; color: #777 !important; pointer-events: none; }
+    /* BOTON SOS SERIO Y REDISEÑADO */
+    .sos-wrapper { display: flex; justify-content: center; align-items: center; margin: 35px 0; position: relative; }
+    .sos-container { 
+      width: 210px; height: 210px; position: relative; border-radius: 50%; 
+      background: var(--danger); 
+      box-shadow: 0 15px 35px rgba(220, 38, 38, 0.4), inset 0 0 0 6px rgba(255,255,255,0.2); 
+      display: flex; justify-content: center; align-items: center; overflow: hidden;
+      border: 4px solid var(--bg-card);
+    }
+    #btn-sos { 
+      width: 100%; height: 100%; border-radius: 50%; background: transparent; 
+      color: #ffffff; font-size: 46px; font-weight: 900; z-index: 2; 
+      display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0; 
+      text-shadow: 0 2px 5px rgba(0,0,0,0.3); letter-spacing: 2px;
+    }
+    #sos-progress { 
+      position: absolute; bottom: 0; left: 0; width: 0%; height: 100%; 
+      background: rgba(0, 0, 0, 0.25); z-index: 1; pointer-events: none; 
+      transition: width 0.1s linear;
+    }
+    .sos-hint { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; opacity: 0.9; color: #ffffff; text-shadow: none; }
+    .sos-bloqueado { background: var(--danger-dark) !important; color: #fca5a5 !important; pointer-events: none; }
     
-    @keyframes heartbeat { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); transform: scale(1); } 70% { box-shadow: 0 0 0 20px rgba(255, 59, 48, 0); transform: scale(1.02); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); transform: scale(1); } }
-    .sos-container::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; animation: heartbeat 2s infinite; z-index: 0; border: 4px solid var(--danger); opacity: 0.1; }
+    @keyframes heartbeat { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); transform: scale(1); } 70% { box-shadow: 0 0 0 25px rgba(220, 38, 38, 0); transform: scale(1.02); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); transform: scale(1); } }
+    .sos-container::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; animation: heartbeat 2s infinite; z-index: 0; border: 4px solid var(--danger); opacity: 0.15; }
 
     .vista { display: none; height: 100%; flex-direction: column; }
     .vista-activa { display: flex; animation: fadeIn 0.4s ease; }
@@ -76,7 +91,7 @@
 
     .historial-item, .tarjeta { background: var(--bg-body); padding: 16px; margin-bottom: 12px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 500; }
     .tarjeta { flex-direction: column; align-items: flex-start; border-left: 5px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: var(--bg-card); }
-    .tarjeta.sos { border-left-color: var(--danger); background: rgba(255, 59, 48, 0.05); }
+    .tarjeta.sos { border-left-color: var(--danger); background: rgba(220, 38, 38, 0.05); }
 
     .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .grid-botones button { background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border); height: auto; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; border-radius: 20px; }
@@ -90,7 +105,7 @@
     .toast-show { top: 40px; }
     
     .estado-respuesta-sos { background: #ffe5e5; color: #d70015; border: 2px solid #d70015; padding: 15px; border-radius: 16px; margin-bottom: 15px; animation: heartbeat 2s infinite; }
-    [data-theme="oscuro"] .estado-respuesta-sos { background: #3a0000; color: #ff6b6b; border-color: #ff453a; }
+    [data-theme="oscuro"] .estado-respuesta-sos { background: #3a0000; color: #ff6b6b; border-color: #ef4444; }
 
     .theme-selector { background: var(--bg-body); padding: 4px; border-radius: 14px; display: flex; margin: 20px 0; }
     .theme-selector button { background: transparent; color: var(--text-sec); padding: 8px; border-radius: 10px; font-size: 12px; box-shadow: none; }
@@ -124,7 +139,7 @@
   <div id="loader" class="modal-overlay" style="z-index: 10000; display: none;">
     <div style="background: var(--bg-card); padding: 30px 40px; border-radius: 24px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
        <div class="modern-spinner"></div>
-       <p style="margin-top: 15px; font-weight: 600; color: var(--text-main); font-size: 15px;">Conectando...</p>
+       <p id="loader-text" style="margin-top: 15px; font-weight: 600; color: var(--text-main); font-size: 15px;">Conectando...</p>
     </div>
   </div>
 
@@ -143,7 +158,10 @@
       <div class="sos-wrapper">
         <div class="sos-container">
           <div id="sos-progress"></div>
-          <button id="btn-sos">🚨<span style="display: block; margin-top: 5px;">SOS</span><span class="sos-hint" id="sos-instruccion">MANTENER</span></button>
+          <button id="btn-sos">
+            SOS
+            <span class="sos-hint" id="sos-instruccion">MANTENER PRESIONADO</span>
+          </button>
         </div>
       </div>
 
@@ -215,14 +233,23 @@
 
     function chequearPin(input) { if (input.value.length === 4) { input.blur(); iniciarSesion(); } }
 
+    function mostrarLoader(texto = "Conectando...") {
+      document.getElementById('loader-text').innerText = texto;
+      document.getElementById('loader').style.display = 'flex';
+    }
+
+    function ocultarLoader() {
+      document.getElementById('loader').style.display = 'none';
+    }
+
     async function iniciarSesion(autoId = null) {
       const inputEl = document.getElementById('inputId');
       const id = autoId || inputEl.value;
       if(!id) return;
       
-      document.getElementById('loader').style.display = 'flex'; // SPINNER NUEVO
+      mostrarLoader("Iniciando sesión...");
       const res = await api('login', { id });
-      document.getElementById('loader').style.display = 'none';
+      ocultarLoader();
       
       if(res.error) {
         if(autoId) localStorage.removeItem('idVecinal');
@@ -305,10 +332,11 @@
     }
 
     // ==========================================
-    // LÓGICA SOS ROBUSTA (AWAIT ANTES DEL LINK)
+    // LÓGICA SOS ROBUSTA Y GLOBAL
     // ==========================================
     function bloquearBotonSOS() {
-      const btn = document.getElementById('btn-sos'); btn.classList.add('sos-bloqueado'); btn.innerHTML = '🚨 ENVIADO'; document.getElementById('sos-instruccion').innerText = '';
+      const btn = document.getElementById('btn-sos'); btn.classList.add('sos-bloqueado'); 
+      btn.innerHTML = '<span style="font-size:32px">ENVIADO</span>'; 
     }
 
     function configurarSOS() {
@@ -326,6 +354,8 @@
           clearInterval(iterador); 
           if(navigator.vibrate) navigator.vibrate([500, 200, 500]); 
           bloquearBotonSOS();
+          
+          mostrarLoader("Emitiendo Alerta Global...");
 
           // 1. Obtener GPS rápidamente
           let lat = null, lng = null;
@@ -339,12 +369,17 @@
               } catch (err) { console.log("GPS Timeout o Denegado"); }
           }
 
-          // 2. ESPERAR a que la API lo guarde en la BD (Garita notificada)
+          // 2. Registrar en Garita
           await procesarAviso('SOS', lat, lng);
 
-          // 3. RECIÉN AHORA abrir WhatsApp. Al ser href no se bloquea en iOS/Safari.
+          // 3. Notificar a TODOS los vecinos mediante Push
+          await api('alertaGarita', { motivo: `🚨 EMERGENCIA EN DOMICILIO: ${userActual.domicilio} (${userActual.nombre})` });
+          
+          ocultarLoader();
+
+          // 4. Abrir WhatsApp al grupo vecinal
           const link = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : 'Sin GPS.';
-          const txt = `🚨 *EMERGENCIA VECINAL - ROBO EN PROCESO* 🚨\n\nSoy ${userActual.nombre}\nTel: ${userActual.telefono || 'Sin registro'}\nDom: ${userActual.domicilio}\n\n¡ESTOY SUFRIENDO UN ROBO! Por favor, llamen al 911 ahora mismo.\nUbicación: ${link}`;
+          const txt = `🚨 *EMERGENCIA VECINAL* 🚨\n\nSoy ${userActual.nombre}\nDom: ${userActual.domicilio}\n\n¡NECESITO AYUDA INMEDIATA! Por favor, llamen al 911.\nUbicación: ${link}`;
           window.location.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`;
         }, 2000);
       };
@@ -360,7 +395,7 @@
         if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
         if(tipoAlertaActual === 'SOS') {
            elEstado.className = 'estado-respuesta-sos'; 
-           elEstado.innerHTML = '<div>👮 <b>¡AYUDA EN CAMINO!</b></div><div style="font-size:14px; margin-top:5px;">La garita ha confirmado la emergencia.</div>';
+           elEstado.innerHTML = '<div>👮 <b>¡AYUDA EN CAMINO!</b></div><div style="font-size:14px; margin-top:5px;">Voy a llamar al 911 y me acerco a tu domicilio.</div>';
         } else {
            elEstado.className = '';
            elEstado.innerHTML = '<span style="color:var(--success); font-size:18px;">✅ ¡Visto por Garita!</span><br><span style="font-size:13px; color:var(--text-sec)">Puedes ingresar.</span>';
@@ -393,9 +428,9 @@
       if(!motivoAlertaActual) return;
       const motivo = motivoAlertaActual; cerrarModalConfirmacion();
       
-      document.getElementById('loader').style.display = 'flex'; // Spinner al enviar
+      mostrarLoader("Enviando Alerta...");
       await api('alertaGarita', { motivo: motivo }); 
-      document.getElementById('loader').style.display = 'none';
+      ocultarLoader();
       
       mostrarToastExito("✅ Alerta enviada a todos"); actualizarGarita();
     });
@@ -440,9 +475,9 @@
 
     async function confirmarGarita(id) {
       if(navigator.vibrate) navigator.vibrate(50);
-      document.getElementById('loader').style.display = 'flex'; // Spinner al confirmar
+      mostrarLoader("Confirmando vista...");
       await api('confirmarAviso', { idAviso: id });
-      document.getElementById('loader').style.display = 'none';
+      ocultarLoader();
       actualizarGarita();
     }
 
