@@ -52,12 +52,15 @@
     .pin-input { background: transparent; border: none; border-bottom: 2px solid var(--border); font-size: 48px; font-weight: 700; letter-spacing: 12px; text-align: center; width: 80%; margin: 40px auto; color: var(--text-main); display: block; border-radius: 0; font-family: monospace; }
     .pin-input:focus { outline: none; border-bottom-color: var(--primary); }
 
-    button { border: none; border-radius: var(--radius-md); font-size: 17px; font-weight: 600; padding: 16px; cursor: pointer; transition: transform 0.1s, opacity 0.2s; width: 100%; position: relative; overflow: hidden; }
+    button { border: none; border-radius: var(--radius-md); font-size: 17px; font-weight: 600; padding: 16px; cursor: pointer; transition: transform 0.1s, opacity 0.2s; width: 100%; position: relative; overflow: hidden; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
     button:active { transform: scale(0.97); opacity: 0.9; }
     .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px var(--primary-dim); }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--primary); margin-top: 10px; }
     .btn-logout { background: transparent; color: var(--text-sec); font-size: 14px; margin-top: auto; padding: 20px 0; }
     .btn-success { background: var(--success); color: white; font-size: 18px; height: 60px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3); }
+
+    .btn-llegando { background: linear-gradient(135deg, var(--success), #28a745); color: white; font-size: 20px; font-weight: 800; height: 75px; display: flex; align-items: center; justify-content: center; gap: 12px; border-radius: 20px; box-shadow: 0 8px 20px rgba(52, 199, 89, 0.3); text-transform: uppercase; letter-spacing: 1px; }
+    .btn-danger-garita { background: var(--danger); color: white; border: none; border-radius: var(--radius-md); box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4); }
 
     /* BOTON SOS SERIO Y REDISEÑADO */
     .sos-wrapper { display: flex; justify-content: center; align-items: center; margin: 35px 0; position: relative; }
@@ -92,6 +95,9 @@
     .historial-item, .tarjeta { background: var(--bg-body); padding: 16px; margin-bottom: 12px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 500; }
     .tarjeta { flex-direction: column; align-items: flex-start; border-left: 5px solid var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: var(--bg-card); }
     .tarjeta.sos { border-left-color: var(--danger); background: rgba(220, 38, 38, 0.05); }
+
+    .tarjeta.sos-urgente { border: 3px solid var(--danger); background: linear-gradient(135deg, rgba(220, 38, 38, 0.05) 0%, rgba(220, 38, 38, 0.15) 100%); animation: pulse-sos 1.5s infinite; transform: scale(1.02); margin-bottom: 20px; }
+    @keyframes pulse-sos { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); } 70% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
 
     .grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .grid-botones button { background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border); height: auto; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; border-radius: 20px; }
@@ -152,7 +158,7 @@
     <!-- VISTA VECINO -->
     <div class="vista" id="vista-vecino">
       <header style="margin-bottom: 20px; text-align: left;"><h2 id="vecino-nombre" style="color: var(--primary);">Vecino</h2><p id="vecino-domicilio" style="display: flex; align-items: center; gap: 6px;"><span style="font-size: 14px;">📍</span> Cargando dirección...</p></header>
-      <button class="btn-success" onclick="registrarLlegada()"><span>🚗</span> ESTOY LLEGANDO</button>
+      <button class="btn-llegando" onclick="registrarLlegada()"><span>🚗</span> ESTOY LLEGANDO</button>
       <div id="mensaje-estado" style="text-align: center; margin: 15px 0; font-weight: 600; min-height: 24px;"></div>
       
       <div class="sos-wrapper">
@@ -318,7 +324,11 @@
       try {
         const res = await api('registrarAviso', { usuario: userActual, tipo, lat, lng });
         if(res.error) {
-          document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--danger)">⚠️ ${res.error}</span>`;
+          let errorMsg = res.error;
+          if (errorMsg.includes('lejos')) {
+              errorMsg = "ESTÁS MUY LEJOS DEL RADIO PERMITIDO. SOLO SE PUEDE AVISAR A LA GARITA DENTRO DE UN RADIO DE 1KM PARA QUE ESTÉN ATENTOS A TU INGRESO AL DOMICILIO.";
+          }
+          document.getElementById('mensaje-estado').innerHTML = `<div style="background: var(--danger-dark); color: white; padding: 15px; border-radius: 12px; font-size: 14px; line-height: 1.4; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">⚠️ ${errorMsg}</div>`;
         } else {
           document.getElementById('mensaje-estado').innerHTML = `<span style="color:var(--primary)">⏳ ${res.mensaje}</span>`;
           if (tipo === 'LLEGADA' || tipo === 'SOS') {
@@ -395,7 +405,7 @@
         if(navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
         if(tipoAlertaActual === 'SOS') {
            elEstado.className = 'estado-respuesta-sos'; 
-           elEstado.innerHTML = '<div>👮 <b>¡AYUDA EN CAMINO!</b></div><div style="font-size:14px; margin-top:5px;">Voy a llamar al 911 y me acerco a tu domicilio.</div>';
+           elEstado.innerHTML = '<div>👮 <b>¡AYUDA EN CAMINO!</b></div><div style="font-size:14px; margin-top:5px;">Voy a llamar al 911 ahora y me acerco a la puerta de tu casa.</div>';
         } else {
            elEstado.className = '';
            elEstado.innerHTML = '<span style="color:var(--success); font-size:18px;">✅ ¡Visto por Garita!</span><br><span style="font-size:13px; color:var(--text-sec)">Puedes ingresar.</span>';
@@ -463,8 +473,21 @@
         if(a.tipo === 'SOS') hayEmergencia = true;
         if(!alertasNotificadas.has(a.id)) { alertasNotificadas.add(a.id); emitirSonidoAlarma(a.tipo === 'SOS'); }
         hayPendientesNuevos = true;
-        return `<div class="tarjeta ${a.tipo === 'SOS' ? 'sos' : ''}">
-          <div style="width:100%"><div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; font-size: 18px; color: ${a.tipo === 'SOS' ? 'var(--danger)' : 'var(--primary)'};">${a.tipo === 'SOS' ? '🚨 SOS' : '🚗 LLEGANDO'}</h3><span style="font-size:12px; color:var(--text-sec);">Hace ${a.tiempo} min</span></div><p style="font-size:20px; margin: 8px 0; font-weight: 700; color: var(--text-main);">${a.domicilio}</p><p style="font-size: 15px; margin-bottom:10px; color: var(--text-sec);">${a.nombre}</p><button class="btn-success" style="height:45px; font-size:16px;" onclick="confirmarGarita('${a.id}')">CONFIRMAR VISTA</button></div></div>`;
+        return `<div class="tarjeta ${a.tipo === 'SOS' ? 'sos-urgente' : ''}">
+          <div style="width:100%">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+               <h3 style="margin:0; font-size: ${a.tipo === 'SOS' ? '24px' : '18px'}; color: ${a.tipo === 'SOS' ? 'var(--danger)' : 'var(--primary)'}; font-weight: 900; text-transform: uppercase;">${a.tipo === 'SOS' ? '🚨 SOS EMERGENCIA 🚨' : '🚗 LLEGANDO'}</h3>
+               <span style="font-size:14px; font-weight:bold; color:${a.tipo === 'SOS' ? 'var(--danger)' : 'var(--text-sec)'};">Hace ${a.tiempo} min</span>
+            </div>
+            <div style="margin: 15px 0; padding: 10px; background: ${a.tipo === 'SOS' ? 'rgba(220,38,38,0.1)' : 'var(--bg-body)'}; border-radius: 12px;">
+                <p style="font-size:24px; margin: 0 0 5px 0; font-weight: 900; color: var(--text-main);">${a.domicilio}</p>
+                <p style="font-size: 16px; margin:0; color: var(--text-sec); font-weight: 600;">${a.nombre}</p>
+            </div>
+            <button class="${a.tipo === 'SOS' ? 'btn-danger-garita' : 'btn-success'}" style="width:100%; height:55px; font-size:18px; text-transform:uppercase; font-weight:800;" onclick="confirmarGarita('${a.id}')">
+                ${a.tipo === 'SOS' ? 'CONFIRMAR EMERGENCIA' : 'CONFIRMAR VISTA'}
+            </button>
+          </div>
+        </div>`;
       }).join('');
       
       // PERSISTENCIA: Suena cada 15 segs si hay un aviso colgado sin confirmar.
